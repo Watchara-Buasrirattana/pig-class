@@ -1,5 +1,7 @@
+import Authentication from '../Pages/authentication'
+
 export default function Home() {
   return (
-    <div><p>Hi</p></div>
+      <Authentication />
   );
 }

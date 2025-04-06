@@ -6,4 +6,8 @@ export default function RegisterForm() {
         email: "",
         password: "",
     })
+
+    return (
+        <div></div>
+    )
 }

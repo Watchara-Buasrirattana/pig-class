@@ -1,0 +1,199 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  CANCELLED
+  FAILED
+}
+
+enum QuestionType {
+  CHOICE
+  WRITTEN
+}
+
+model User {
+  id             Int           @id @default(autoincrement())
+  email          String        @unique
+  hashedPassword String
+  firstName      String
+  lastName       String
+  phoneNumber    String
+  schoolName     String?
+  studyLine      String?
+  gradeLevel     String?
+  role           String
+  profileImg     String?
+  parentName     String?
+  parentEmail    String?
+  parentPhone    String?
+  point          Int           @default(0)
+  enrollments    Enrollment[]
+  cart           Cart?
+  payments       Payment[]
+  userExercises  UserExercise[]
+  achievements   Achievement[]
+  articles       Article[]
+  orders         Order[]
+}
+
+model Course {
+  id           Int           @id @default(autoincrement())
+  courseNumber String
+  courseName   String
+  description  String
+  price        Float
+  courseImg    String?
+  lessons      Lesson[]
+  enrollments  Enrollment[]
+  cartItems    CartItem[]
+  orders       Order[]
+  videos       Video[]
+  documents    Document[]
+}
+
+model Enrollment {
+  id         Int      @id @default(autoincrement())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     Int
+  course     Course   @relation(fields: [courseId], references: [id])
+  courseId   Int
+  date       DateTime @default(now())
+}
+
+model Cart {
+  id       Int        @id @default(autoincrement())
+  user     User       @relation(fields: [userId], references: [id])
+  userId   Int        @unique
+  items    CartItem[]
+}
+
+model CartItem {
+  id       Int     @id @default(autoincrement())
+  cart     Cart    @relation(fields: [cartId], references: [id])
+  cartId   Int
+  course   Course  @relation(fields: [courseId], references: [id])
+  courseId Int
+  quantity Int
+}
+
+model Order {
+  id          Int         @id @default(autoincrement())
+  user        User        @relation(fields: [userId], references: [id])
+  userId      Int
+  course      Course      @relation(fields: [courseId], references: [id])
+  courseId    Int
+  orderDate   DateTime    @default(now())
+  orderNumber String
+  totalPrice  Float
+  status      OrderStatus @default(PENDING)
+  payments    Payment[]   
+}
+
+
+model Payment {
+  id           Int      @id @default(autoincrement())
+  user         User     @relation(fields: [userId], references: [id])
+  userId       Int
+  order        Order    @relation(fields: [orderId], references: [id])
+  orderId      Int
+  totalAmount  Float
+  status       String
+  paymentDate  DateTime @default(now())
+}
+
+model Lesson {
+  id           Int      @id @default(autoincrement())
+  course       Course   @relation(fields: [courseId], references: [id])
+  courseId     Int
+  title        String
+  lessonNumber Int
+}
+
+model Video {
+  id        Int     @id @default(autoincrement())
+  course    Course  @relation(fields: [courseId], references: [id])
+  courseId  Int
+  title     String
+  url       String
+}
+
+model Document {
+  id        Int     @id @default(autoincrement())
+  course    Course  @relation(fields: [courseId], references: [id])
+  courseId  Int
+  title     String
+  fileUrl   String
+  fileSize  Int
+}
+
+model Exercise {
+  id          Int        @id @default(autoincrement())
+  title       String
+  description String
+  level       String
+  questions   Question[]
+  userResults UserExercise[]
+}
+
+model Question {
+  id            Int          @id @default(autoincrement())
+  exercise      Exercise     @relation(fields: [exerciseId], references: [id])
+  exerciseId    Int
+  type          QuestionType
+  questionText  String
+  choiceA       String?
+  choiceB       String?
+  choiceC       String?
+  choiceD       String?
+  correctAnswer String?
+  sampleAnswer  String?
+}
+
+model UserExercise {
+  id             Int       @id @default(autoincrement())
+  user           User      @relation(fields: [userId], references: [id])
+  userId         Int
+  exercise       Exercise  @relation(fields: [exerciseId], references: [id])
+  exerciseId     Int
+  completionDate DateTime
+  pointsAwarded  Int
+}
+
+model Achievement {
+  id        Int    @id @default(autoincrement())
+  user      User   @relation(fields: [userId], references: [id])
+  userId    Int
+  image     String
+}
+
+model Article {
+  id           Int      @id @default(autoincrement())
+  user         User     @relation(fields: [userId], references: [id])
+  userId       Int
+  category     Category @relation(fields: [categoryId], references: [id])
+  categoryId   Int
+  title        String
+  description  String
+  image        String
+  publishedAt  DateTime
+}
+
+model Category {
+  id           Int       @id @default(autoincrement())
+  name         String
+  articles     Article[]
+}

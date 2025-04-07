@@ -92,7 +92,7 @@ export default function Authentication() {
           onSubmit={handleLogin}
           style={{ display: isLogin ? "block" : "none" }}
         >
-          <label>
+          <label className="auth-label">
             E-mail
             <input
               type="email"
@@ -105,7 +105,7 @@ export default function Authentication() {
             />
           </label>
 
-          <label>
+          <label className="auth-label">
             รหัสผ่าน
             <input
               type="password"
@@ -135,7 +135,7 @@ export default function Authentication() {
           onSubmit={handleRegister}
           style={{ display: isLogin ? "none" : "block" }}
         >
-          <label>
+          <label className="auth-label">
             E-mail
             <input
               type="email"
@@ -148,7 +148,7 @@ export default function Authentication() {
             />
           </label>
 
-          <label>
+          <label className="auth-label">
             ชื่อ
             <input
               type="text"
@@ -161,7 +161,7 @@ export default function Authentication() {
             />
           </label>
 
-          <label>
+          <label className="auth-label">
             นามสกุล
             <input
               type="text"
@@ -174,7 +174,7 @@ export default function Authentication() {
             />
           </label>
 
-          <label>
+          <label className="auth-label">
             รหัสผ่าน
             <input
               type="password"
@@ -187,7 +187,7 @@ export default function Authentication() {
             />
           </label>
 
-          <label>
+          <label className="auth-label">
             ยืนยันรหัสผ่าน
             <input
               type="password"
@@ -200,7 +200,7 @@ export default function Authentication() {
             />
           </label>
 
-          <label>
+          <label className="auth-label">
             เบอร์โทรศัพท์
             <input
               type="text"
@@ -214,14 +214,14 @@ export default function Authentication() {
           </label>
 
           <div className="terms">
-            <label>
+            <label className="auth-label">
               <input
                 type="checkbox"
                 name="acceptTerms"
                 checked={formData.acceptTerms}
                 onChange={handleChange}
               />{" "}
-              ยอมรับเงื่อนไขในการใช้งานและการเปิดเผยข้อมูลตามนโยบายเว็บไซต์
+              ฉันยอมรับเงื่อนไขในการลงทะเบียนและนโยบายส่วนบุคคล
             </label>
           </div>
 

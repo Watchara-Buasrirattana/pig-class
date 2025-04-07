@@ -19,35 +19,49 @@
   .auth-logo {
     display: block;
     margin: 0 auto;
-    width: 100px;
+    width: 200px;
   }
   
   .auth-title {
     text-align: center;
-    font-weight: bold;
-    font-size: 1.2rem;
+    font-weight: 700;
+    font-size: 22px;
     margin-top: 1rem;
     margin-bottom: 1.5rem;
   }
+
+  .auth-label {
+    font-family: 'Sukhumvit Set', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+  }  
   
   .auth-input {
     width: 100%;
-    padding: 0.5rem;
+    padding: 0.5rem 1rem;
     margin-top: 0.25rem;
     margin-bottom: 1rem;
     border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 0.9rem;
+    border-radius: 12px;
+    font-size: 14px;
   }
+
+  .auth-input::placeholder {
+    color: #C9C9C9;
+    opacity: 1;
+    font-weight: 500;
+  }
+  
 
   .forgot-password {
     text-align: right;
-    margin-top: -0.75rem;
+    /* margin-top: 1rem; */
     margin-bottom: 1rem;
   }
   
   .forgot-password button {
-    font-size: 0.8rem;
+    font-size: 14px;
+    font-weight: 700;
     color: red;
     background: none;
     border: none;
@@ -64,11 +78,12 @@
   .auth-button {
     width: 100%;
     padding: 0.6rem;
-    background-color: #0044cc;
+    background-color: #0043CC;
     color: white;
+    font-size: 15px;
     font-weight: bold;
     border: none;
-    border-radius: 6px;
+    border-radius: 12px;
     cursor: pointer;
     transition: background 0.2s ease;
   }
@@ -84,22 +99,33 @@
   }
   
   .terms {
-    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    font-size: 15px;
     color: red;
-    margin-top: -0.5rem;
     margin-bottom: 1rem;
+    line-height: 1.4;
+    padding: 0 0.5rem;
+  }
+  
+  .terms input[type="checkbox"] {
+    transform: scale(1.5);
+    margin-right: 0.5rem;
+    cursor: pointer;
   }
   
   .switch-link {
     text-align: center;
     margin-top: 1rem;
-    font-size: 0.9rem;
+    font-size: 14px;
+    font-weight: 700;
   }
   
   .switch-link a {
-    color: #0044cc;
+    margin-left: 6px;
+    color: #0043cc;
     text-decoration: none;
-    font-weight: 500;
   }
   
   .switch-link a:hover {

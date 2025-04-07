@@ -5,11 +5,45 @@
   --foreground: #000000;
 }
 
+@font-face {
+  font-family: 'Sukhumvit Set';
+  src: url('/fonts/SukhumvitSet-Thin.ttf') format('truetype');
+  font-weight: 100;
+}
+
+@font-face {
+  font-family: 'Sukhumvit Set';
+  src: url('/fonts/SukhumvitSet-Light.ttf') format('truetype');
+  font-weight: 300;
+}
+
+@font-face {
+  font-family: 'Sukhumvit Set';
+  src: url('/fonts/SukhumvitSet-Text.ttf') format('truetype');
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: 'Sukhumvit Set';
+  src: url('/fonts/SukhumvitSet-Medium.ttf') format('truetype');
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: 'Sukhumvit Set';
+  src: url('/fonts/SukhumvitSet-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+}
+
+@font-face {
+  font-family: 'Sukhumvit Set';
+  src: url('/fonts/SukhumvitSet-Bold.ttf') format('truetype');
+  font-weight: 700;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 /* @media (prefers-color-scheme: dark) {
@@ -22,5 +56,8 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+* {
+  font-family: 'Sukhumvit Set', sans-serif !important;
 }

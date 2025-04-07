@@ -25,6 +25,18 @@ export default function Authentication() {
     }))
   }
 
+  // API Login
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault()
+    setMessage("✅ (Mock) เข้าสู่ระบบสำเร็จ")
+  }
+
+  const handleForgetPassword = (e: React.FormEvent) => {
+    e.preventDefault()
+    setMessage("⚠️ (Mock) ลืมรหัสผ่าน")
+  }
+
+  //API Register
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     setMessage("")
@@ -69,11 +81,6 @@ export default function Authentication() {
     }
   }
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
-    setMessage("✅ (Mock) เข้าสู่ระบบสำเร็จ") // รอ API
-  }
-
   return (
     <div className="auth-wrapper">
       <div className="auth-container">
@@ -110,6 +117,13 @@ export default function Authentication() {
               required
             />
           </label>
+
+          <div className="forgot-password">
+            <button type="button" onClick={(handleForgetPassword)}>
+              ลืมรหัส
+            </button>
+          </div>
+
 
           <button type="submit" className="auth-button">
             เข้าสู่ระบบ

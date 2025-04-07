@@ -1,8 +1,6 @@
-import Authentication from '../Pages/authentication'
-import Page from "./register/page"
-
+import Auth from "./components/Authentication"
 export default function Home() {
   return (
-      <Page />
+      <Auth />
   );
 }

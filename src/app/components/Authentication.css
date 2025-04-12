@@ -85,12 +85,16 @@
     border: none;
     border-radius: 12px;
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: transform 0.1s ease, background-color 0.2s ease;
   }
   
   .auth-button:hover {
     background-color: #0033aa;
   }
+
+  .auth-button:active {
+    transform: scale(.95);
+  }  
   
   .auth-message {
     margin-top: 0.75rem;

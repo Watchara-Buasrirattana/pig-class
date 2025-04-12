@@ -1,8 +1,10 @@
 "use client"
-import React, { useState } from "react"
+import React, {useState } from "react"
 import "./Authentication.css"
 import Image from "next/image"
 import Logo from "../img/Logo.png"
+import { signIn } from "next-auth/react" 
+
 
 export default function Authentication() {
   const [isLogin, setIsLogin] = useState(true)
@@ -26,9 +28,23 @@ export default function Authentication() {
   }
 
   // API Login
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    setMessage("✅ (Mock) เข้าสู่ระบบสำเร็จ")
+    setMessage("")
+  
+    const res = await signIn("credentials", {
+      redirect: false,
+      email: formData.email,
+      password: formData.password,
+    })
+  
+    if (res?.error) {
+      setMessage(`❌ ${res.error}`)
+    } else {
+      setMessage("✅ เข้าสู่ระบบสำเร็จ")
+      // หรือ redirect ไปหน้าอื่น
+      // router.push("/")
+    }
   }
 
   const handleForgetPassword = (e: React.FormEvent) => {

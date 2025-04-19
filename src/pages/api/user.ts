@@ -29,6 +29,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       schoolName,
       studyLine,
       gradeLevel,
+      parentName,
+      parentEmail,
+      parentPhone,
     } = req.body;
 
     const updated = await prisma.user.update({
@@ -40,6 +43,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         schoolName,
         studyLine,
         gradeLevel,
+        parentName,
+        parentEmail,
+        parentPhone,
       },
     });
 

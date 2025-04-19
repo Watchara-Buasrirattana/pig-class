@@ -1,0 +1,164 @@
+.container {
+    display: flex;
+    max-width: 80rem;
+    margin: 2.5rem auto;
+    font-family: 'Prompt', sans-serif;
+}
+
+.sidebar {
+    width: 16rem;
+    background: white;
+    padding: 1.5rem;
+    margin-right: 2rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.avatarBox {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.avatar {
+    width: 5rem;
+    height: 5rem;
+    border-radius: 9999px;
+    margin: 0 auto 0.5rem;
+}
+
+.sidebarMenu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menuItem {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    color: #333;
+}
+
+.menuItem:hover {
+    background: #f3f4f6;
+}
+
+.menuItem.active {
+    background: #e0e7ff;
+    color: #2563eb;
+    font-weight: 600;
+}
+
+.menuIcon {
+    margin-right: 0.5rem;
+}
+
+.content {
+    flex: 1;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.titleWithBar {
+    display: flex;
+    align-items: center;
+    font-size: 25px;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+}
+
+.blueBar {
+    width: 5px;
+    height: 1.5em;
+    background-color: #0043CC;
+    border-radius: 0.125rem;
+    margin-right: 1rem;
+    display: inline-block;
+}
+
+.tabBar {
+    display: flex;
+    border-bottom: 2px solid #e5e7eb;
+    margin-bottom: 1.5rem;
+    gap: 0.25rem;
+}
+
+.tab {
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+    font-size: 16px;
+    border-bottom: 2px solid transparent;
+    color: #000000;
+    background-color: #C9C9C9;
+    cursor: pointer;
+}
+
+.tab:hover {
+    color: #0043CC;
+}
+
+.tab.active {
+    color: #ffffff;
+    background-color: #0043CC;
+}
+
+.formGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.label {
+    display: block;
+    font-size: 16px;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.25rem;
+}
+
+.input {
+    border: 1px solid #d1d5db;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    width: 100%;
+}
+
+.input[disabled] {
+    background-color: hsla(0, 0%, 75%, 0.4);
+}
+
+.button {
+    border: 1.5px solid #0043CC;
+    color: #0043CC;
+    padding: 0.5rem 2.5rem;
+    font-weight: 700;
+    border-radius: 1rem;
+    cursor: pointer;
+    background: transparent;
+}
+
+.button:hover {
+    background-color: #eff6ff;
+}
+
+.card {
+    border: 1px solid #e5e7eb;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.pointsCard {
+    background-color: #1d4ed8;
+    color: white;
+    text-align: center;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    width: 16rem;
+}

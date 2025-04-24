@@ -123,7 +123,6 @@ export default function ProfilePage() {
           </li>
         </ul>
       </aside>
-
       {/* Content Area */}
       <div className={styles.content}>
         {activeMenu === "courses" && (

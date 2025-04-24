@@ -6,6 +6,7 @@ import InfoIcon from "../img/Profile-icon.png";
 import PaymentIcon from "../img/Payment-icon.png";
 import PigIcon from "../img/Pig-icon.png";
 import LogoutIcon from "../img/Logout-icon.png";
+import { signOut } from "next-auth/react";
 
 export default function ProfilePage() {
   const [activeMenu, setActiveMenu] = useState("courses");
@@ -102,8 +103,14 @@ export default function ProfilePage() {
             </li>
           ))}
           <li
-            onClick={() => alert("ออกจากระบบ")}
-            className={`${styles.menuItem} text-red-600 hover:underline mt-4`}
+            // --- เปลี่ยน onClick ตรงนี้ ---
+            onClick={() => {
+              // (Optional) เพิ่มการยืนยันก่อน Logout
+              if (window.confirm("คุณต้องการออกจากระบบใช่หรือไม่?")) {
+                signOut({ callbackUrl: "/login" }); // <-- เรียก signOut และกำหนดหน้าที่จะไปหลัง Logout (เช่น หน้าแรก)
+              }
+            }}
+            className={`${styles.menuItem} text-red-600 hover:underline mt-4 cursor-pointer`} // <-- เพิ่ม cursor-pointer
           >
             <img
               src={LogoutIcon.src}

@@ -6,6 +6,7 @@ import InfoIcon from "../img/Profile-icon.png";
 import PaymentIcon from "../img/Payment-icon.png";
 import PigIcon from "../img/Pig-icon.png";
 import LogoutIcon from "../img/Logout-icon.png";
+import { signOut } from "next-auth/react";
 
 export default function ProfilePage() {
     const [activeMenu, setActiveMenu] = useState("courses");
@@ -62,6 +63,88 @@ export default function ProfilePage() {
     };
 
     // if (!user) return <p>Loading...</p>
+
+
+  return (
+    <div className={styles.container}>
+      {/* Sidebar */}
+      <aside className={styles.sidebar}>
+        <div className={styles.avatarBox}>
+          <img src={PigIcon.src} alt="avatar" className={styles.avatar} />
+          <div className="font-semibold">
+            {user?.firstName} {user?.lastName}
+          </div>
+        </div>
+        <ul className={styles.sidebarMenu}>
+          {[
+            { key: "courses", icon: CourseIcon, label: "คอร์สของฉัน" },
+            { key: "info", icon: InfoIcon, label: "ข้อมูลส่วนตัว" },
+            { key: "orders", icon: PaymentIcon, label: "ประวัติการสั่งซื้อ" },
+            { key: "points", icon: PigIcon, label: "แต้มการสะสม" },
+          ].map(({ key, icon, label }) => (
+            <li
+              key={key}
+              onClick={() => setActiveMenu(key)}
+              className={`${styles.menuItem} ${
+                activeMenu === key ? styles.active : ""
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <img
+                  src={icon.src}
+                  alt={`icon-${key}`}
+                  width={25}
+                  height={25}
+                  className={`${styles.menuIcon} ${
+                    activeMenu === key ? "" : "grayscale"
+                  }`}
+                />
+                {label}
+              </div>
+            </li>
+          ))}
+          <li
+            // --- เปลี่ยน onClick ตรงนี้ ---
+            onClick={() => {
+              // (Optional) เพิ่มการยืนยันก่อน Logout
+              if (window.confirm("คุณต้องการออกจากระบบใช่หรือไม่?")) {
+                signOut({ callbackUrl: "/login" }); // <-- เรียก signOut และกำหนดหน้าที่จะไปหลัง Logout (เช่น หน้าแรก)
+              }
+            }}
+            className={`${styles.menuItem} text-red-600 hover:underline mt-4 cursor-pointer`} // <-- เพิ่ม cursor-pointer
+          >
+            <img
+              src={LogoutIcon.src}
+              alt="icon"
+              width={25}
+              height={25}
+              className={styles.menuIcon}
+            />{" "}
+            <span className="ml-2">ออกจากระบบ</span>
+          </li>
+        </ul>
+      </aside>
+      {/* Content Area */}
+      <div className={styles.content}>
+        {activeMenu === "courses" && (
+          <div>
+            <h2 className={styles.titleWithBar}>
+              <span className={styles.blueBar}></span>
+              คอร์สของฉัน
+            </h2>
+            <div className={styles.card} style={{ width: "16rem" }}>
+              <p className="font-medium mb-1">
+                คณิตศาสตร์ ม.2 ก่อนเปิดภาคเรียนที่ 1
+              </p>
+              <p className="text-sm text-gray-400 mb-2">รหัส M05</p>
+              <img src="/course-cover.png" alt="course" className="mb-2" />
+              <p className="text-right text-gray-600 mb-3">999 บาท</p>
+              <button className="bg-blue-600 text-white w-full py-2 rounded">
+                เข้าเรียน
+              </button>
+            </div>
+          </div>
+        )}
 
     return (
         <div className={styles.container}>
@@ -136,7 +219,6 @@ export default function ProfilePage() {
                         </div>
                     </div>
                 )}
-
                 {activeMenu === "info" && (
                     <div>
                         <h2 className={styles.titleWithBar}>

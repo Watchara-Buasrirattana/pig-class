@@ -55,13 +55,15 @@ model Course {
   courseNumber String
   courseName   String
   description  String
+  category     String?
+  teacher      String?
+  level        String?
   price        Float
   courseImg    String?
   lessons      Lesson[]
   enrollments  Enrollment[]
   cartItems    CartItem[]
   orders       Order[]
-  videos       Video[]
   documents    Document[]
 }
 
@@ -121,12 +123,13 @@ model Lesson {
   courseId     Int
   title        String
   lessonNumber Int
+  videos       Video[]
 }
 
 model Video {
   id        Int     @id @default(autoincrement())
-  course    Course  @relation(fields: [courseId], references: [id])
-  courseId  Int
+  lesson   Lesson @relation(fields: [lessonId], references: [id])
+  lessonId Int
   title     String
   url       String
 }

@@ -6,7 +6,7 @@ import { BlobServiceClient } from '@azure/storage-blob';
 const prisma = new PrismaClient();
 const AZURE_STORAGE_CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING;
 // *** สำคัญ: ต้องรู้ Container Name ที่ใช้เก็บไฟล์ PDF ***
-const CONTAINER_NAME = process.env.AZURE_STORAGE_CONTAINER_NAME_DOCS || 'coursedocuments';
+const CONTAINER_NAME = process.env.AZURE_STORAGE_CONTAINER_NAME_DOCS || 'coursedocs';
 
 if (!AZURE_STORAGE_CONNECTION_STRING) {
   throw new Error('Azure Storage Connection String is not configured.');

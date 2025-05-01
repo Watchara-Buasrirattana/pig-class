@@ -1,259 +1,370 @@
-"use client"
-import { useState } from 'react';
-import styles from './home.module.css';
-import Image from 'next/image';
-import banner from '../img/banner1.png';
-import course from '../img/recom-course.png';
-import teacher from '../img/Teacher.png';
-import hallOfFlame from '../img/hallOfFlame.png';
-import guide from '../img/guide.png';
-import benefit from '../img/benefit.png';
-import line from '../img/line.png';
-import facebook from '../img/facebook.png';
-import ig from '../img/ig.png';
-import tiktok from '../img/tiktok.png';
-import youtube from '../img/youtube.png';
-import article1 from '../img/article1.png';
-import article2 from '../img/article2.png';
-import article3 from '../img/article3.png';
+"use client";
+import { useState, useEffect } from "react";
+
+import styles from "./home.module.css";
+import Image, { StaticImageData } from "next/image";
+import banner from "../img/banner1.png";
+import defaultCourseImage from "../img/recom-course.png";
+import teacher from "../img/Teacher.png";
+import hallOfFlame from "../img/hallOfFlame.png";
+import guide from "../img/guide.png";
+import benefit from "../img/benefit.png";
+import line from "../img/line.png";
+import facebook from "../img/facebook.png";
+import ig from "../img/ig.png";
+import tiktok from "../img/tiktok.png";
+import youtube from "../img/youtube.png";
+import article1 from "../img/article1.png";
+import article2 from "../img/article2.png";
+import article3 from "../img/article3.png";
+
+type CourseFromAPI = {
+  id: number;
+  courseNumber: string;
+  courseName: string;
+  description: string; 
+  category: string | null;
+  teacher: string | null;
+  level: string | null;
+  price: number;
+  courseImg?: string | null;
+};
 
 const banners = [
-    { id: 1, src: banner, alt: 'คอร์สคณิตศาสตร์' },
-    { id: 2, src: banner, alt: 'อีกคอร์สหนึ่ง' },
-    { id: 3, src: banner, alt: 'คอร์สพิเศษ' },
-];
-
-const allCourses = [
-    { id: 'M01', title: 'คอร์สพื้นฐาน ม.1', price: '999 บาท', image: course },
-    { id: 'M02', title: 'คอร์สพื้นฐาน ม.2', price: '999 บาท', image: course },
-    { id: 'M03', title: 'คอร์สพื้นฐาน ม.3', price: '999 บาท', image: course },
-    { id: 'M04', title: 'คอร์สพื้นฐาน ม.4', price: '999 บาท', image: course },
-    { id: 'M05', title: 'คอร์สพื้นฐาน ม.5', price: '999 บาท', image: course },
-    { id: 'M06', title: 'คอร์สพื้นฐาน ม.6', price: '999 บาท', image: course },
+  { id: 1, src: banner, alt: "คอร์สคณิตศาสตร์" },
+  { id: 2, src: banner, alt: "อีกคอร์สหนึ่ง" },
+  { id: 3, src: banner, alt: "คอร์สพิเศษ" },
 ];
 
 const socials = [
-    {
-        name: 'Line',
-        label: '@pig class',
-        icon: line,
-        link: 'https://line.me/ti/p/~pigclass'
-    },
-    {
-        name: 'Facebook',
-        label: 'pig class',
-        icon: facebook,
-        link: 'https://facebook.com/pigclass'
-    },
-    {
-        name: 'Instagram',
-        label: 'pig class',
-        icon: ig,
-        link: 'https://instagram.com/pigclass'
-    },
-    {
-        name: 'TikTok',
-        label: 'pig class',
-        icon: tiktok,
-        link: 'https://tiktok.com/@pigclass'
-    },
-    {
-        name: 'YouTube',
-        label: 'pig class',
-        icon: youtube,
-        link: 'https://youtube.com/@pigclass'
-    },
+  {
+    name: "Line",
+    label: "@pig class",
+    icon: line,
+    link: "https://line.me/ti/p/~pigclass",
+  },
+  {
+    name: "Facebook",
+    label: "pig class",
+    icon: facebook,
+    link: "https://facebook.com/pigclass",
+  },
+  {
+    name: "Instagram",
+    label: "pig class",
+    icon: ig,
+    link: "https://instagram.com/pigclass",
+  },
+  {
+    name: "TikTok",
+    label: "pig class",
+    icon: tiktok,
+    link: "https://tiktok.com/@pigclass",
+  },
+  {
+    name: "YouTube",
+    label: "pig class",
+    icon: youtube,
+    link: "https://youtube.com/@pigclass",
+  },
 ];
 
-const categories = ['คลังความรู้', 'Check List', 'โจทย์ข้อสอบ', 'อื่น ๆ'];
+const categories = ["คลังความรู้", "Check List", "โจทย์ข้อสอบ", "อื่น ๆ"];
 
 const articles = {
-    'คลังความรู้': [
-        { title: 'คลังความรู้ ครั้งที่ 1 พฤษภาคม ม.2', image: article1, link: '#' },
-        { title: 'คลังความรู้ ครั้งที่ 1 พฤษภาคม ม.2', image: article1, link: '#' },
-        { title: 'คลังความรู้ ครั้งที่ 1 พฤษภาคม ม.2', image: article1, link: '#' },
-        { title: 'คลังความรู้ ครั้งที่ 1 พฤษภาคม ม.2', image: article1, link: '#' },
-    ],
-    'Check List': [
-        { title: 'Check List จำนวนจริง', image: article3, link: '#' },
-        { title: 'Check List จำนวนจริง', image: article3, link: '#' },
-        { title: 'Check List จำนวนจริง', image: article3, link: '#' },
-        { title: 'Check List จำนวนจริง', image: article3, link: '#' },
-    ],
-    'โจทย์ข้อสอบ': [
-        { title: 'โจทย์ความรู้ สถิติ', image: article2, link: '#' },
-        { title: 'โจทย์ความรู้ สถิติ', image: article2, link: '#' },
-        { title: 'โจทย์ความรู้ สถิติ', image: article2, link: '#' },
-        { title: 'โจทย์ความรู้ สถิติ', image: article2, link: '#' },
-    ],
-    'อื่น ๆ': [
-        { title: 'คลังความรู้ ครั้งที่ 1 พฤษภาคม ม.2', image: article1, link: '#' },
-        { title: 'Check List จำนวนจริง', image: article3, link: '#' },
-        { title: 'โจทย์ความรู้ สถิติ', image: article2, link: '#' },
-        { title: 'คลังความรู้ ครั้งที่ 1 พฤษภาคม ม.2', image: article1, link: '#' },
-    ],
+  คลังความรู้: [
+    { title: "คลังความรู้ ครั้งที่ 1 พฤษภาคม ม.2", image: article1, link: "#" },
+    { title: "คลังความรู้ ครั้งที่ 1 พฤษภาคม ม.2", image: article1, link: "#" },
+    { title: "คลังความรู้ ครั้งที่ 1 พฤษภาคม ม.2", image: article1, link: "#" },
+    { title: "คลังความรู้ ครั้งที่ 1 พฤษภาคม ม.2", image: article1, link: "#" },
+  ],
+  "Check List": [
+    { title: "Check List จำนวนจริง", image: article3, link: "#" },
+    { title: "Check List จำนวนจริง", image: article3, link: "#" },
+    { title: "Check List จำนวนจริง", image: article3, link: "#" },
+    { title: "Check List จำนวนจริง", image: article3, link: "#" },
+  ],
+  โจทย์ข้อสอบ: [
+    { title: "โจทย์ความรู้ สถิติ", image: article2, link: "#" },
+    { title: "โจทย์ความรู้ สถิติ", image: article2, link: "#" },
+    { title: "โจทย์ความรู้ สถิติ", image: article2, link: "#" },
+    { title: "โจทย์ความรู้ สถิติ", image: article2, link: "#" },
+  ],
+  "อื่น ๆ": [
+    { title: "คลังความรู้ ครั้งที่ 1 พฤษภาคม ม.2", image: article1, link: "#" },
+    { title: "Check List จำนวนจริง", image: article3, link: "#" },
+    { title: "โจทย์ความรู้ สถิติ", image: article2, link: "#" },
+    { title: "คลังความรู้ ครั้งที่ 1 พฤษภาคม ม.2", image: article1, link: "#" },
+  ],
 };
 
-
 // CourseCard Components
-function CourseCard({ course }: { course: any }) {
-    return (
-        <div className={styles.courseCard}>
-            <div className={styles.imageWrapper}>
-                <Image src={course.image} alt={course.title} width={180} height={240} />
-            </div>
-            <p className={styles.price}>{course.price}</p>
-            <p className={styles.courseTitle}>{course.title}</p>
-            <p className={styles.code}>รหัส {course.id}</p>
-            <div className={styles.actions}>
-                <span className={styles.cart}>🛒</span>
-                <button className={styles.detailBtn}>รายละเอียด</button>
-            </div>
-        </div>
-    );
+function CourseCard({ course }: { course: CourseFromAPI }) {
+  const imageUrl = course.courseImg || defaultCourseImage.src;
+
+  return (
+    <div className={styles.courseCard}>
+      <div className={styles.imageWrapper}>
+        <Image
+          src={imageUrl}
+          alt={course.courseName}
+          fill
+          style={{ objectFit: 'cover' }} 
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // ตัวอย่าง sizes
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = defaultCourseImage.src;
+          }}
+        />
+        {/* ----------------- */}
+      </div>
+      <p className={styles.price}>{course.price.toLocaleString()} บาท</p>
+      <p className={styles.courseTitle}>{course.courseName}</p>
+      <p className={styles.code}>รหัส {course.courseNumber}</p>
+      <div className={styles.actions}>
+        <span className={styles.cart}>🛒</span>
+        <button className={styles.detailBtn}>รายละเอียด</button>
+      </div>
+    </div>
+  );
 }
 
 export default function Home() {
-    const [current, setCurrent] = useState(0);
-    const [showAll, setShowAll] = useState(false);
-    const [activeTab, setActiveTab] = useState('คลังความรู้');
+  const [current, setCurrent] = useState(0);
+  const [showAll, setShowAll] = useState(false);
+  const [activeTab, setActiveTab] = useState("คลังความรู้");
+  const [fetchedCourses, setFetchedCourses] = useState<CourseFromAPI[]>([]);
+  const [isLoadingCourses, setIsLoadingCourses] = useState(true); // สถานะ Loading
+  const [errorCourses, setErrorCourses] = useState<string | null>(null); // สถานะ Error
 
-    const nextSlide = () => setCurrent((prev) => (prev + 1) % banners.length);
-    const prevSlide = () => setCurrent((prev) => (prev - 1 + banners.length) % banners.length);
+  const nextSlide = () => setCurrent((prev) => (prev + 1) % banners.length);
+  const prevSlide = () =>
+    setCurrent((prev) => (prev - 1 + banners.length) % banners.length);
 
-    const firstCourses = allCourses.slice(0, 4);
-    const moreCourses = allCourses.slice(4);
+  const firstCourses = fetchedCourses.slice(0, 4);
+  const moreCourses = fetchedCourses.slice(4);
 
-    return (
-        <main>
-            {/* Banner */}
-            <div className={styles.sliderWrapper}>
-                <div className={styles.slider}>
-                    {banners.map((banner, index) => (
-                        <div key={banner.id} className={index === current ? styles.slideActive : styles.slide}>
-                            {index === current && (
-                                <Image
-                                    src={banner.src}
-                                    alt={banner.alt}
-                                    width={0}
-                                    height={0}
-                                    style={{ width: '100%', height: '100%' }}
-                                    className={styles.image}
-                                />
-                            )}
-                        </div>
-                    ))}
-                </div>
-                <button onClick={prevSlide} className={styles.prev}>❮</button>
-                <button onClick={nextSlide} className={styles.next}>❯</button>
+  useEffect(() => {
+    const fetchCoursesFromApi = async () => {
+      setIsLoadingCourses(true);
+      setErrorCourses(null);
+      try {
+        const res = await fetch("/api/courses"); // เรียก API GET
+        if (!res.ok) {
+          throw new Error(`Failed to fetch courses (status: ${res.status})`);
+        }
+        const data: CourseFromAPI[] = await res.json();
+        setFetchedCourses(data); // เก็บข้อมูลที่ได้ใน State
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+        setErrorCourses(
+          error instanceof Error ? error.message : "An unknown error occurred"
+        );
+      } finally {
+        setIsLoadingCourses(false); // เสร็จสิ้นการโหลด (ไม่ว่าจะสำเร็จหรือ Error)
+      }
+    };
+
+    fetchCoursesFromApi();
+  }, []);
+  return (
+    <main>
+      {/* Banner */}
+      <div className={styles.sliderWrapper}>
+        <div className={styles.slider}>
+          {banners.map((banner, index) => (
+            <div
+              key={banner.id}
+              className={index === current ? styles.slideActive : styles.slide}
+            >
+              {index === current && (
+                <Image
+                  src={banner.src}
+                  alt={banner.alt}
+                  width={0}
+                  height={0}
+                  style={{ width: "100%", height: "100%" }}
+                  className={styles.image}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+        <button onClick={prevSlide} className={styles.prev}>
+          ❮
+        </button>
+        <button onClick={nextSlide} className={styles.next}>
+          ❯
+        </button>
+      </div>
+
+      {/* --- Courses --- */}
+      <section className={styles.recommendSection}>
+        <h2 className={styles.title}>คอร์สเรียนแนะนำ</h2>
+
+        {/* --- แสดงสถานะ Loading หรือ Error --- */}
+        {isLoadingCourses && (
+          <p className="text-center py-4">Loading courses...</p>
+        )}
+        {errorCourses && (
+          <p className="text-center py-4 text-red-600">
+            Error loading courses: {errorCourses}
+          </p>
+        )}
+
+        {/* --- แสดงคอร์สเมื่อโหลดเสร็จและไม่มี Error --- */}
+        {!isLoadingCourses && !errorCourses && (
+          <>
+            {/* First 4 */}
+            <div className={styles.courseList}>
+              {/* ใช้ fetchedCourses ที่ได้จาก API */}
+              {firstCourses.map((course) => (
+                <CourseCard key={course.id} course={course} /> // ส่ง course object ทั้งหมดไปเลย
+              ))}
             </div>
 
-            {/* Courses */}
-            <section className={styles.recommendSection}>
-                <h2 className={styles.title}>คอร์สเรียนแนะนำ</h2>
+            {/* More (toggle) */}
+            {showAll && (
+              <div className={styles.courseList}>
+                {moreCourses.map((course) => (
+                  <CourseCard key={course.id} course={course} />
+                ))}
+              </div>
+            )}
 
-                {/* First 4 */}
-                <div className={styles.courseList}>
-                    {firstCourses.map((course, idx) => (
-                        <CourseCard key={idx} course={course} />
-                    ))}
-                </div>
+            {/* ปุ่ม ดูทั้งหมด (แสดงเมื่อมีคอร์สมากกว่า 4 และยังไม่ได้กดดูทั้งหมด) */}
+            {fetchedCourses.length > 4 && !showAll && (
+              <p className={styles.viewAll} onClick={() => setShowAll(true)}>
+                ดูคอร์สเรียนทั้งหมด
+              </p>
+            )}
+            {fetchedCourses.length === 0 && (
+              <p className="text-center text-gray-500 py-4">
+                ยังไม่มีคอร์สเรียนในขณะนี้
+              </p>
+            )}
+          </>
+        )}
+      </section>
 
-                {/* More (toggle) */}
-                {showAll && (
-                    <div className={styles.courseList}>
-                        {moreCourses.map((course, idx) => (
-                            <CourseCard key={idx} course={course} />
-                        ))}
-                    </div>
-                )}
+      <section className={styles.doctorPigSection}>
+        <div className={styles.imageContainer}>
+          <Image
+            src={teacher.src}
+            alt="ครูหมู"
+            fill
+            className={styles.imageFull}
+          />
+        </div>
+      </section>
 
-                {!showAll && (
-                    <p className={styles.viewAll} onClick={() => setShowAll(true)}>
-                        ดูคอร์สเรียนทั้งหมด
-                    </p>
-                )}
-            </section>
+      <section className={styles.hallOfFrameSection}>
+        <div className={styles.hallOfFrameHeader}>
+          <h2 className={styles.hallOfFrameTitle}></h2>
+          <h2 className={styles.hallOfFrameTitle}>ความสำเร็จ</h2>
+          <a href="/hallOfFrame" className={styles.viewAll}>
+            ดูทั้งหมด
+          </a>
+        </div>
 
-            <section className={styles.doctorPigSection}>
-                <div className={styles.imageContainer}>
-                    <Image src={teacher.src} alt="ครูหมู" fill className={styles.imageFull} />
-                </div>
-            </section>
+        <div className={styles.hallOfFrameGrid}>
+          {[...Array(8)].map((_, idx) => (
+            <div key={idx} className={styles.hallOfFrameCard}>
+              <Image
+                src={hallOfFlame.src}
+                alt={`ความสำเร็จ ${idx + 1}`}
+                width={260}
+                height={140}
+              />
+            </div>
+          ))}
+        </div>
+      </section>
 
-            <section className={styles.hallOfFrameSection}>
-                <div className={styles.hallOfFrameHeader}>
-                    <h2 className={styles.hallOfFrameTitle}></h2>
-                    <h2 className={styles.hallOfFrameTitle}>ความสำเร็จ</h2>
-                    <a href="/hallOfFrame" className={styles.viewAll}>ดูทั้งหมด</a>
-                </div>
+      <section className={styles.articleTabSection}>
+        <h2 className={styles.articleTitle}>บทความ</h2>
 
-                <div className={styles.hallOfFrameGrid}>
-                    {[...Array(8)].map((_, idx) => (
-                        <div key={idx} className={styles.hallOfFrameCard}>
-                            <Image src={hallOfFlame.src} alt={`ความสำเร็จ ${idx + 1}`} width={260} height={140} />
-                        </div>
-                    ))}
-                </div>
-            </section>
+        {/* Tabs */}
+        <div className={styles.tabList}>
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              className={`${styles.tabItem} ${
+                activeTab === cat ? styles.activeTab : ""
+              }`}
+              onClick={() => setActiveTab(cat)}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
 
-            <section className={styles.articleTabSection}>
-                <h2 className={styles.articleTitle}>บทความ</h2>
+        {/* Content */}
+        <div className={styles.articleGrid}>
+          {articles[activeTab].slice(0, 4).map((article, idx) => (
+            <div key={idx} className={styles.articleCard}>
+              <a href={article.link} className={styles.articleImageLink}>
+                {" "}
+                {/* Link หลัก */}
+                <Image src={article.image} /* ... */ alt={""} /* ... */ />
+                <p className={styles.articleName}>{article.title}</p>
+                {/* แก้เป็น p หรือ span */}
+                <p className={styles.articleLink}>{activeTab}</p>
+              </a>
+            </div>
+          ))}
+        </div>
 
-                {/* Tabs */}
-                <div className={styles.tabList}>
-                    {categories.map((cat) => (
-                        <button
-                            key={cat}
-                            className={`${styles.tabItem} ${activeTab === cat ? styles.activeTab : ''}`}
-                            onClick={() => setActiveTab(cat)}
-                        >
-                            {cat}
-                        </button>
-                    ))}
-                </div>
+        <div className={styles.articleButtonWrapper}>
+          <a href="/articles" className={styles.viewAllBtn}>
+            ดูทั้งหมด
+          </a>
+        </div>
+      </section>
 
-                {/* Content */}
-                <div className={styles.articleGrid}>
-                    {articles[activeTab].slice(0, 4).map((article, idx) => (
-                        <div key={idx} className={styles.articleCard}>
-                            <a href={article.link} className={styles.articleImageLink}>
-                                <Image src={article.image} alt={article.title} width={260} height={180} className={styles.articleImage} />
-                                <p className={styles.articleName}>{article.title}</p>
-                                <a className={styles.articleLink}>{activeTab}</a>
-                            </a>
-                        </div>
-                    ))}
-                </div>
+      <section className={styles.doctorPigSection}>
+        <div className={styles.imageContainer}>
+          <Image
+            src={guide.src}
+            alt="ครูหมู"
+            fill
+            className={styles.imageFull}
+          />
+        </div>
+      </section>
 
-                <div className={styles.articleButtonWrapper}>
-                    <a href="/articles" className={styles.viewAllBtn}>ดูทั้งหมด</a>
-                </div>
-            </section>
+      <section className={styles.doctorPigSection2}>
+        <div className={styles.imageContainer2}>
+          <Image
+            src={benefit.src}
+            alt="ครูหมู"
+            fill
+            className={styles.imageFull}
+          />
+        </div>
+      </section>
 
-            <section className={styles.doctorPigSection}>
-                <div className={styles.imageContainer}>
-                    <Image src={guide.src} alt="ครูหมู" fill className={styles.imageFull} />
-                </div>
-            </section>
-
-            <section className={styles.doctorPigSection2}>
-                <div className={styles.imageContainer2}>
-                    <Image src={benefit.src} alt="ครูหมู" fill className={styles.imageFull} />
-                </div>
-            </section>
-
-            <section className={styles.socialSection}>
-                <h2 className={styles.socialTitle}>ช่องทางการติดตาม</h2>
-                <div className={styles.socialGrid}>
-                    {socials.map((social, idx) => (
-                        <a key={idx} href={social.link} className={styles.socialItem} target="_blank" rel="noopener noreferrer">
-                            <Image src={social.icon} alt={social.name} width={60} height={60} />
-                            <p className={styles.socialLabel}>{social.label}</p>
-                        </a>
-                    ))}
-                </div>
-            </section>
-        </main>
-    );
+      <section className={styles.socialSection}>
+        <h2 className={styles.socialTitle}>ช่องทางการติดตาม</h2>
+        <div className={styles.socialGrid}>
+          {socials.map((social, idx) => (
+            <a
+              key={idx}
+              href={social.link}
+              className={styles.socialItem}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Image
+                src={social.icon}
+                alt={social.name}
+                width={60}
+                height={60}
+              />
+              <p className={styles.socialLabel}>{social.label}</p>
+            </a>
+          ))}
+        </div>
+      </section>
+    </main>
+  );
 }

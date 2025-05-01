@@ -7,8 +7,8 @@ const prisma = new PrismaClient();
 
 // --- Environment Variables (ควรมี Connection String และ Container Names) ---
 const AZURE_STORAGE_CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING;
-const CONTAINER_NAME_IMAGES = process.env.AZURE_STORAGE_CONTAINER_NAME || 'courseimages'; // ชื่อ Container รูป Course
-const CONTAINER_NAME_DOCS = process.env.AZURE_STORAGE_CONTAINER_NAME_DOCS || 'coursedocuments'; // ชื่อ Container เอกสาร
+const CONTAINER_NAME_IMAGES = process.env.AZURE_STORAGE_CONTAINER_NAME || 'course'; // ชื่อ Container รูป Course
+const CONTAINER_NAME_DOCS = process.env.AZURE_STORAGE_CONTAINER_NAME_DOCS || 'coursedocs'; // ชื่อ Container เอกสาร
 const CONTAINER_NAME_VIDEOS = process.env.AZURE_STORAGE_CONTAINER_NAME_VIDEOS || 'coursevideos'; // ชื่อ Container วิดีโอ
 
 if (!AZURE_STORAGE_CONNECTION_STRING) {
@@ -76,8 +76,37 @@ export default async function handler(
     } else if (req.method === 'PUT') {
         // ... (โค้ด PUT เหมือนเดิม) ...
         try {
-             const { /* data */ } = req.body;
-             const updateData: any = { /* ... */};
+             const { courseNumber, courseName, description, price, courseImg, category ,teacher,level } = req.body;
+             const updateData: any = {};
+             if (courseName !== undefined) {
+                if (typeof courseName !== 'string' || courseName.trim() === '') return res.status(400).json({ error: 'Course Name cannot be empty.' });
+                updateData.courseName = courseName.trim();
+            }
+            if (courseNumber !== undefined) {
+                updateData.courseNumber = courseNumber; // อาจจะเพิ่ม validation
+            }
+            if (description !== undefined) {
+                updateData.description = description;
+            }
+            if (category !== undefined) {
+                updateData.category = category;
+            }
+            if (teacher !== undefined) {
+                updateData.teacher = teacher;
+            }
+            if (level !== undefined) {
+                updateData.level = level;
+            }
+            if (price !== undefined) {
+                const priceAsNumber = Number(price);
+                if (isNaN(priceAsNumber) || priceAsNumber < 0) return res.status(400).json({ error: 'Price must be a non-negative number.' });
+                updateData.price = priceAsNumber;
+            }
+            if (courseImg !== undefined) {
+                // ถ้าส่ง courseImg มา (อาจจะเป็น URL ใหม่ หรือ null/ค่าว่าง ถ้าต้องการลบ)
+                // ก็กำหนดค่านั้นลงไปตรงๆ
+               updateData.courseImg = courseImg; // <-- แค่นี้พอครับ!
+           }
              const updatedCourse = await prisma.course.update({ where: { id: idAsNumber }, data: updateData });
              return res.status(200).json(updatedCourse);
         } catch (error: any) { /* ... */ }

@@ -7,7 +7,7 @@ import fs from 'fs'; // Node.js file system module
 // --- Configuration ---
 // ควรเก็บไว้ใน Environment Variables (.env.local)
 const AZURE_STORAGE_CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING;
-const CONTAINER_NAME = process.env.AZURE_STORAGE_CONTAINER_NAME || 'courseimages'; // Your container name
+const CONTAINER_NAME = process.env.AZURE_STORAGE_CONTAINER_NAME || 'course'; // Your container name
 
 if (!AZURE_STORAGE_CONNECTION_STRING) {
   throw new Error('Azure Storage Connection String is not configured in environment variables.');

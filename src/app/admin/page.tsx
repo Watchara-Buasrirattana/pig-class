@@ -3,6 +3,7 @@ import { useEffect, useState, ChangeEvent, FormEvent } from "react"; // <-- เ�
 import { Dialog } from "@headlessui/react";
 import LessonModal from "../components/LessonModal"; // <-- ตรวจสอบ Path
 import DocumentManagementModal from "../components/DocumentManagementModal"; // <-- ตรวจสอบ Path
+import { usePathname } from 'next/navigation';
 
 type Course = {
   id: number;
@@ -21,6 +22,7 @@ type CourseFormData = Omit<Course, "id">;
 
 export default function AdminPage() {
   // --- State เดิม ---
+  const pathname = usePathname();
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
@@ -37,7 +39,6 @@ export default function AdminPage() {
     price: 0,
     courseImg: "",
   });
-
   // --- State ใหม่สำหรับ Edit ---
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
   const [courseToEdit, setCourseToEdit] = useState<Course | null>(null);
@@ -331,19 +332,7 @@ export default function AdminPage() {
 
   return (
     <div className="flex h-screen">
-      {/* Sidebar */}
-      <aside className="w-64 bg-blue-700 text-white p-6 flex flex-col">
-        {/* ... Sidebar Items ... */}
-        <div className="text-2xl font-bold mb-8">Admin</div>
-        <nav className="space-y-4 flex-1">
-          <SidebarItem label="Dashboard" />
-          <SidebarItem label="ผู้ใช้งาน user" />
-          <SidebarItem label="คอร์สเรียน" active />
-          <SidebarItem label="บทความ" />
-          <SidebarItem label="ความสำเร็จ" />
-        </nav>
-        <SidebarItem label="ออกจากระบบ" />
-      </aside>
+    
 
       {/* Main Content */}
       <main className="flex-1 p-8 bg-gray-100 overflow-y-auto">
@@ -747,15 +736,3 @@ export default function AdminPage() {
   );
 }
 
-// --- SidebarItem (เหมือนเดิม) ---
-function SidebarItem({ label, active }: { label: string; active?: boolean }) {
-  return (
-    <div
-      className={`px-4 py-2 rounded cursor-pointer ${
-        active ? "bg-blue-900" : "hover:bg-blue-600"
-      }`}
-    >
-      {label}
-    </div>
-  );
-}

@@ -319,3 +319,15 @@
     font-size: 24px;
     font-weight: 700;
 }
+.imageWrapper {
+    width: 100%; /* ให้ความกว้างยืดตาม card */
+    overflow: hidden; /* สำคัญ: ซ่อนส่วนของรูปที่ล้นกรอบ */
+    position: relative; /* บางทีจำเป็นสำหรับ Next/Image */
+    background-color: #e5e7eb; /* สีพื้นหลังเทาๆ อ่อนๆ ไว้เผื่อตอนรูปยังไม่โหลด */
+  
+    /* --- เลือก aspect-ratio ที่ต้องการ --- */
+    /* aspect-ratio: 16 / 9;  /* สำหรับสัดส่วน Widescreen */
+    /* aspect-ratio: 4 / 3;   /* สำหรับสัดส่วนแนวนอน */
+    aspect-ratio: 3 / 4;   /* สำหรับสัดส่วนแนวตั้ง (อาจจะเหมาะกับโปสเตอร์คอร์ส) */
+    /* aspect-ratio: 1 / 1;   /* สำหรับสัดส่วนจตุรัส */
+  }

@@ -1,0 +1,333 @@
+/* Banner Section */
+.sliderWrapper {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+.slider {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+}
+
+.slide {
+    min-width: 100%;
+    height: 100%;
+    display: none;
+    position: relative;
+}
+
+.slideActive {
+    min-width: 100%;
+    height: 100%;
+    display: block;
+    position: relative;
+}
+
+.image {
+    object-fit: contain;
+}
+
+.prev,
+.next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.7);
+    border: none;
+    font-size: 2rem;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.prev {
+    left: 10px;
+}
+
+.next {
+    right: 10px;
+}
+
+/* Recommended Section */
+.recommendSection {
+    text-align: center;
+    padding: 3rem 1rem;
+    background-color: #fff;
+}
+
+.title {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 2rem;
+}
+
+.courseList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 2rem;
+    justify-content: center;
+    align-items: stretch;
+    max-width: 1000px;
+    margin: 2rem auto;
+}
+
+
+.courseCard {
+    width: 200px;
+    text-align: center;
+}
+
+.imageWrapper {
+    margin-bottom: 1rem;
+}
+
+.price {
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.courseTitle {
+    font-size: 21px;
+    font-weight: 700;
+}
+
+.code {
+    color: #C9C9C9;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cart {
+    font-size: 1.5rem;
+}
+
+.detailBtn {
+    background-color: #0043CC;
+    color: white;
+    padding: 0.3rem 1.5rem;
+    border: none;
+    border-radius: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.detailBtn:hover {
+    background-color: #003db3;
+}
+
+.viewAll {
+    font-size: 24px;
+    margin-top: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+    color: #000;
+    text-decoration: underline;
+}
+
+.doctorPigSection {
+    height: 80vh;
+    background-color: #F3F7FF;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.doctorPigSection2 {
+    height: 70vh;
+    background-color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.imageContainer {
+    position: relative;
+    width: 90%;
+    height: 90%;
+}
+
+.imageContainer2 {
+    position: relative;
+    width: 70%;
+    height: 70%;
+}
+
+.imageFull {
+    object-fit: contain;
+}
+
+.hallOfFrameSection {
+    padding: 3rem 1rem;
+    background-color: #fff;
+    max-width: 1200px;
+    margin: 3rem auto;
+}
+
+.hallOfFrameHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.hallOfFrameTitle {
+    font-size: 36px;
+    font-weight: bold;
+}
+
+.hallOfFrameGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2.5rem;
+    justify-items: center;
+}
+
+.hallOfFrameCard {
+    width: 100%;
+    max-width: 260px;
+    aspect-ratio: 13 / 7;
+    background-color: #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.articleTabSection {
+    text-align: center;
+    padding: 3rem 1rem;
+    background-color: #fff;
+}
+
+.articleTitle {
+    font-size: 40px;
+    font-weight: bold;
+    margin-bottom: 2rem;
+    color: #0363D5;
+}
+
+.tabList {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.tabItem {
+    font-size: 28px;
+    background: none;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    color: black;
+}
+
+.activeTab {
+    color: #0363D5;
+    border-bottom: 3px solid #0363D5;
+}
+
+.articleGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.articleCard {
+    text-align: left;
+}
+
+.articleName {
+    font-size: 20px;
+    font-weight: 700;
+    margin-top: 0.5rem;
+}
+
+.articleLink {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0043CC;
+    display: block;
+    margin-top: 0.2rem;
+}
+
+.articleButtonWrapper {
+    margin-top: 2rem;
+}
+
+.viewAllBtn {
+    background-color: #0043CC;
+    font-size: 20px;
+    color: #fff;
+    padding: 0.5rem 1.5rem;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-block;
+}
+
+
+.socialSection {
+    display: grid;
+    align-content: center;
+    background-color: #F3F7FF;
+    height: 30vh;
+    padding: 2rem 1rem;
+    text-align: center;
+}
+
+.socialTitle {
+    font-size: 32px;
+    font-weight: bold;
+    color: #0043CC;
+    margin-bottom: 2rem;
+}
+
+.socialGrid {
+    display: flex;
+    justify-content: center;
+    gap: 2.5rem;
+    flex-wrap: wrap;
+}
+
+.socialItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: black;
+}
+
+.socialItem:hover {
+    opacity: 0.8;
+}
+
+.socialLabel {
+    margin-top: 1rem;
+    font-size: 24px;
+    font-weight: 700;
+}
+.imageWrapper {
+    width: 100%; /* ให้ความกว้างยืดตาม card */
+    overflow: hidden; /* สำคัญ: ซ่อนส่วนของรูปที่ล้นกรอบ */
+    position: relative; /* บางทีจำเป็นสำหรับ Next/Image */
+    background-color: #e5e7eb; /* สีพื้นหลังเทาๆ อ่อนๆ ไว้เผื่อตอนรูปยังไม่โหลด */
+  
+    /* --- เลือก aspect-ratio ที่ต้องการ --- */
+    /* aspect-ratio: 16 / 9;  /* สำหรับสัดส่วน Widescreen */
+    /* aspect-ratio: 4 / 3;   /* สำหรับสัดส่วนแนวนอน */
+    aspect-ratio: 3 / 4;   /* สำหรับสัดส่วนแนวตั้ง (อาจจะเหมาะกับโปสเตอร์คอร์ส) */
+    /* aspect-ratio: 1 / 1;   /* สำหรับสัดส่วนจตุรัส */
+  }

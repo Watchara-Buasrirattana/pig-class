@@ -1,0 +1,192 @@
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    font-family: 'Prompt', sans-serif;
+  }
+  
+  .backLink {
+    margin-bottom: 20px;
+  }
+  
+  .backLink a {
+    text-decoration: none;
+    color: #007acc;
+    font-size: 16px;
+  }
+  
+  /* หัวเรื่อง */
+  .title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  
+  .date {
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 30px;
+  }
+  
+  /* เนื้อหาแบบ 2 คอลัมน์ */
+  .contentSection {
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+    margin-bottom: 60px;
+  }
+  
+  /* ด้านซ้าย: รูป + เนื้อหา */
+  .leftContent {
+    flex: 2;
+  }
+  
+  .leftContent h3 {
+    margin-top: 20px;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  
+  /* เนื้อหาบทความ */
+  .articleBody {
+    margin-top: 20px;
+  }
+  
+  .articleBody p {
+    font-size: 16px;
+    line-height: 1.8;
+    white-space: pre-line;
+    color: #333;
+  }
+  
+  /* Sidebar ด้านขวา */
+  .rightSidebar {
+    flex: 1;
+    background-color: #f7f7f7;
+    padding: 20px;
+    border-radius: 12px;
+    height: fit-content;
+  }
+  
+  .rightSidebar h4 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  .rightSidebar ul {
+    list-style: none;
+    padding-left: 0;
+  }
+  
+  .rightSidebar li {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+  
+  /* บทความที่เกี่ยวข้อง */
+  .containerrelated {
+    background-color: #e9f5ff;
+    padding: 1rem;
+  }
+  
+  .relatedHeader {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .relatedGrid {
+    display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+  }
+  
+  .relatedCard {
+    border-radius: 16px;
+    padding: 12px;
+    transition: transform 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  .relatedCard:hover {
+    transform: translateY(-4px);
+  }
+  
+  .relatedCard img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+  }
+  
+  .relatedCard p {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 12px 0 4px;
+    color: #333;
+  }
+  
+  .relatedCard span {
+    font-size: 14px;
+    color: #007acc;
+  }
+  
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .contentSection {
+      flex-direction: column;
+    }
+  
+    .relatedGrid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  .leftContent {
+    display: flex;
+    gap: 20px;
+    flex: 2;
+    align-items: flex-start;
+  }
+  
+  /* คอลัมน์ซ้าย (ภาพ) */
+  .imageWrapper {
+    flex-shrink: 0;
+  }
+  
+  /* คอลัมน์ขวา (เนื้อหา) */
+  .articleBody {
+    flex: 1;
+  }
+  
+  .articleBody h3 {
+    margin-top: 0;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  
+  .articleBody p {
+    font-size: 16px;
+    line-height: 1.8;
+    white-space: pre-line;
+    color: #333;
+  }
+  
+  
+  @media (max-width: 640px) {
+    .title {
+      font-size: 22px;
+    }
+  
+    .relatedGrid {
+      grid-template-columns: 1fr;
+    }
+  
+    .relatedCard p {
+      font-size: 15px;
+    }
+  }
+  

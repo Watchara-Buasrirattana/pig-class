@@ -17,6 +17,8 @@ import youtube from "../img/youtube.png";
 import article1 from "../img/article1.png";
 import article2 from "../img/article2.png";
 import article3 from "../img/article3.png";
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 type CourseFromAPI = {
   id: number;
@@ -169,6 +171,7 @@ export default function Home() {
   return (
     <main>
       {/* Banner */}
+      <Navbar />
       <div className={styles.sliderWrapper}>
         <div className={styles.slider}>
           {banners.map((banner, index) => (
@@ -365,6 +368,7 @@ export default function Home() {
           ))}
         </div>
       </section>
+      <Footer />
     </main>
   );
 }

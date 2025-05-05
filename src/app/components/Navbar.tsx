@@ -11,7 +11,7 @@ const Navbar: React.FC = () => {
   const pathname = usePathname();
 
   const menuItems = [
-    { label: "คอร์สเรียน", href: "/" },
+    { label: "คอร์สเรียน", href: "/course" },
     { label: "โจทย์เกม", href: "/games" },
     { label: "บทความ", href: "/article" },
     { label: "ความสำเร็จ", href: "/achievement" },

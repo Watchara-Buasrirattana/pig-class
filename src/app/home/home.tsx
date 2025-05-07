@@ -169,7 +169,6 @@ export default function Home() {
   return (
     <main>
       {/* Banner */}
-      <Navbar />
       <div className={styles.sliderWrapper}>
         <div className={styles.slider}>
           {banners.map((banner, index) => (
@@ -362,7 +361,6 @@ export default function Home() {
           ))}
         </div>
       </section>
-      <Footer />
     </main>
   );
 }

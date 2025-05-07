@@ -1,0 +1,136 @@
+.footer {
+  background-color: #0043CC;
+  color: white;
+  padding: 40px 20px;
+  font-family: "Arial", sans-serif;
+  font-size: 16px;
+  
+}
+
+.footer-container {
+  display: grid;
+  grid-template-columns: 2fr 3fr 1.5fr; /* ซ้าย-กลาง-ขวา */
+  gap: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-bottom: 30px;
+}
+
+.footer-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;  /* จัดแนวตั้งกลาง */
+  text-align: center;
+  height: 100%;
+}
+
+.footer-center {
+  flex: 2;
+  display: grid;
+  grid-template-columns: repeat(4, 0.5fr);
+  min-width: 100px;
+  justify-content: space-between;
+  gap: 10px; 
+  padding: 0 0px; 
+  flex-wrap: wrap;
+}
+
+.footer-subcol ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.footer-subcol ul li {
+  margin-bottom: 6px;
+  font-weight: 200;
+}
+
+.footer-right {
+  flex: 1;
+  min-width: 220px;
+}
+.footer-right ul li {
+  margin-bottom: 6px;
+  font-weight: 200;
+}
+
+.auth-logo {
+  width: 140px;
+  object-fit: contain;
+  margin-bottom: 16px;
+}
+
+.footer-title {
+  font-weight: bold;
+  margin-top: 10px;
+  margin-bottom: 8px;
+  font-size: 18px;
+}
+
+.footer-desc {
+  max-width: 400px;
+  line-height: 1.6;
+  font-weight: 280;
+  text-align: center;
+  font-size: 15px;
+}
+
+.footer-address {
+  margin-top: 10px;
+  line-height: 1.6;
+  font-weight: 200;
+}
+
+.footer-right .footer-title {
+  margin-top: 15px;
+}
+
+.footer-social {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.social-icons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.social-icon {
+  width: 28px;
+  height: 28px;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+
+.social-icon:hover {
+  transform: scale(1.2);
+}
+
+.auth-icons {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .footer-container {
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .footer-center {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-center {
+    grid-template-columns: 1fr;
+  }
+}

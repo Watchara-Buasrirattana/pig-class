@@ -1,0 +1,111 @@
+/* เส้นน้ำเงินบนสุด */
+.navbar-topline {
+  background-color: #0043CC;
+  height: 10px;
+  width: 100%;
+}
+
+/* Navbar พื้นหลังขาว */
+.navbar-topbar {
+  background-color: white;
+  padding: 15px 15px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1350px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+  font-family: "Arial", sans-serif;
+  font-size: 20px;
+}
+
+/* โลโก้ */
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.navbar-logo-img {
+  width: 150px;
+  object-fit: contain;
+}
+
+/* เมนู */
+.navbar-menu {
+  display: flex;
+  list-style: none;
+  gap: 50px;
+  padding: 0;
+  margin: 0;
+}
+
+.navbar-menu li a {
+  text-decoration: none;
+  color: #000000;
+  font-weight: bold;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+/* เส้นใต้แสดงเมื่อ hover หรือ active */
+.navbar-menu li a::after {
+  content: "";
+  position: absolute;
+  width: 0%;
+  height: 2px;
+  background-color: #0043CC;
+  left: 0;
+  bottom: -4px;
+  transition: width 0.3s ease;
+}
+
+.navbar-menu li a:hover::after,
+.navbar-menu li a.active::after {
+  width: 100%;
+}
+
+/* ปุ่ม login */
+.navbar-right {
+  display: flex;
+  gap: 10px;
+}
+
+.navbar-btn {
+  background-color: #0043CC;
+  color: #ffffff;
+  padding: 7px 18px;
+  font-size: 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.navbar-btn:hover {
+  background-color: #0033aa;
+  color: white;
+}
+
+.navbar-cart-icon {
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.navbar-cart-icon img {
+  width: 24px;
+  height: 24px;
+}
+
+.navbar-cart-icon:hover {
+  transform: scale(1.1);
+}

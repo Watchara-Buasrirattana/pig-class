@@ -3,11 +3,11 @@ import './Footer.css';
 import Image from 'next/image';
 import Link from 'next/link';
 import Logo from '../img/Logowhite.png';
-import Facebook from '../img/Facebook.png';
-import Ig from '../img/IG.png';
-import Line from '../img/Line.png';
-import Youtube from '../img/Youtube.png';
-import Tiktok from '../img/Tiktok.png';
+import Facebook from '../img/facebook.png';
+import Ig from '../img/ig.png';
+import Line from '../img/line.png';
+import Youtube from '../img/youtube.png';
+import Tiktok from '../img/tiktok.png';
 
 const Footer: React.FC = () => {
   return (

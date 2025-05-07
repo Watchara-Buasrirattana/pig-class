@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-
+import Link from "next/link";
 import styles from "./home.module.css";
 import Image, { StaticImageData } from "next/image";
 import banner from "../img/banner1.png";
@@ -22,7 +22,7 @@ type CourseFromAPI = {
   id: number;
   courseNumber: string;
   courseName: string;
-  description: string; 
+  description: string;
   category: string | null;
   teacher: string | null;
   level: string | null;
@@ -109,7 +109,7 @@ function CourseCard({ course }: { course: CourseFromAPI }) {
           src={imageUrl}
           alt={course.courseName}
           fill
-          style={{ objectFit: 'cover' }} 
+          style={{ objectFit: "cover" }}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // ตัวอย่าง sizes
           onError={(e) => {
             (e.target as HTMLImageElement).src = defaultCourseImage.src;
@@ -130,7 +130,6 @@ function CourseCard({ course }: { course: CourseFromAPI }) {
 
 export default function Home() {
   const [current, setCurrent] = useState(0);
-  const [showAll, setShowAll] = useState(false);
   const [activeTab, setActiveTab] = useState("คลังความรู้");
   const [fetchedCourses, setFetchedCourses] = useState<CourseFromAPI[]>([]);
   const [isLoadingCourses, setIsLoadingCourses] = useState(true); // สถานะ Loading
@@ -141,7 +140,6 @@ export default function Home() {
     setCurrent((prev) => (prev - 1 + banners.length) % banners.length);
 
   const firstCourses = fetchedCourses.slice(0, 4);
-  const moreCourses = fetchedCourses.slice(4);
 
   useEffect(() => {
     const fetchCoursesFromApi = async () => {
@@ -221,21 +219,17 @@ export default function Home() {
                 <CourseCard key={course.id} course={course} /> // ส่ง course object ทั้งหมดไปเลย
               ))}
             </div>
-
-            {/* More (toggle) */}
-            {showAll && (
-              <div className={styles.courseList}>
-                {moreCourses.map((course) => (
-                  <CourseCard key={course.id} course={course} />
-                ))}
-              </div>
-            )}
-
             {/* ปุ่ม ดูทั้งหมด (แสดงเมื่อมีคอร์สมากกว่า 4 และยังไม่ได้กดดูทั้งหมด) */}
-            {fetchedCourses.length > 4 && !showAll && (
-              <p className={styles.viewAll} onClick={() => setShowAll(true)}>
-                ดูคอร์สเรียนทั้งหมด
-              </p>
+            {fetchedCourses.length > 4 && (
+              <div className="text-center mt-4">
+                {" "}
+                {/* อาจจะจัดสไตล์ให้เหมือนปุ่ม */}
+                <Link href="/course" className={styles.viewAll}>
+                  {" "}
+                  {/* <<-- ใช้ Link และ href */}
+                  ดูคอร์สเรียนทั้งหมด
+                </Link>
+              </div>
             )}
             {fetchedCourses.length === 0 && (
               <p className="text-center text-gray-500 py-4">

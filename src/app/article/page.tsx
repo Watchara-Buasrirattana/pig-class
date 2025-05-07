@@ -46,7 +46,6 @@ const ArticleList: React.FC = () => {
 
     return (
         <main> 
-            <Navbar />
             <section className={styles.articleTabSection}>
                 <h2 className={styles.articleTitle}>บทความ</h2>
 
@@ -98,7 +97,6 @@ const ArticleList: React.FC = () => {
                     </div>
                 )}
             </section>
-            <Footer />
         </main>
     );
 };

@@ -49,20 +49,17 @@ export default function ArticleDetail({ params }: { params: { slug: string } }) 
   if (!article) {
     return (
       <main>
-        <Navbar />
         <div className={styles.container}>
           <h2>ไม่พบบทความ</h2>
           <p>Slug: {decodedSlug}</p>
           <Link href="/article">← กลับไปหน้ารวมบทความ</Link>
         </div>
-        <Footer />
       </main>
     );
   }
 
   return (
     <main>
-      <Navbar />
       <div className={styles.container}>
         <div className={styles.backLink}>
           <Link href="/article">← ย้อนกลับ</Link>
@@ -96,8 +93,6 @@ export default function ArticleDetail({ params }: { params: { slug: string } }) 
           })}
         </div>
         </div>
-      
-      <Footer />
     </main>
   );
 }

@@ -9,6 +9,7 @@ import QA from "../../img/QA.png"
 import Worksheet from "../../img/Worksheet.png"
 import Hourglass from "../../img/Hourglass.png"
 import Pig from "../../img/Pig.png"
+import Link from 'next/link';
 
 const courseDetails = {
     title: "คณิตศาสตร์ ม. ก่อนเปิดภาคเรียน 2",
@@ -59,11 +60,7 @@ export default function CourseDetail() {
 
     return (
         <main className={styles.container}>
-
-            <button className={styles.backBtn}>
-                &lt; ย้อนกลับ
-            </button>
-
+            <Link className={styles.backBtn} href="/course">&lt; ย้อนกลับ</Link>
             <section className={styles.topSection}>
                 <div className={styles.imageBox}>
                     <Image

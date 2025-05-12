@@ -1,135 +1,237 @@
-"use client";
-import Image from 'next/image';
-import styles from './courseDetail.module.css';
-import Course from "../../img/courseimg.png"
-import Time from "../../img/Time.png"
-import Watch from "../../img/Watch.png"
-import Limit from "../../img/Limit.png"
-import QA from "../../img/QA.png"
-import Worksheet from "../../img/Worksheet.png"
-import Hourglass from "../../img/Hourglass.png"
-import Pig from "../../img/Pig.png"
-import Link from 'next/link';
 
-const courseDetails = {
-    title: "คณิตศาสตร์ ม. ก่อนเปิดภาคเรียน 2",
-    code: "MT015",
-    price: "฿990",
-    stats: [
-        { icon: Time.src, label: "เวลาที่เรียนได้", value: "20 hr." },
-        { icon: Watch.src, label: "ระยะเวลา", value: "20 hr." },
-        { icon: Limit.src, label: "อายุคอร์ส", value: "20 hr." }
-    ],
-    lessons: [
-        { title: 'คณิตศาสตร์ ม. ก่อนเปิดภาคเรียน 2', link: '/lesson/intro' },
-        { title: 'บทที่ 1 สถิติ', link: '/lesson/1' },
-        { title: 'บทที่ 2 การนำค่ากลับมาประกาศ', link: '/lesson/2' },
-        { title: 'บทที่ 3 เส้นขนาน', link: '/lesson/3' },
-        { title: 'บทที่ 4 การให้เหตุผลทางคณิตศาสตร์', link: '/lesson/4' },
-        { title: 'บทที่ 5 การแยกตัวประกอบของพหุนามดีกรี', link: '/lesson/5' }
-    ],
-    details: [
-        {
-            title: "รายละเอียด",
-            items: [
-                "คอร์สเรียนพิเศษเตรียมความพร้อมก่อนเปิดเทอม 1",
-                "คอร์สเรียนพื้นฐานสอบเข้าม.4",
-                "ตัวอย่าง แบบออนไลน์สด",
-                "เนื้อหา และ ทริค ครบจบในคอร์สเดียว"
-            ]
-        },
-        {
-            title: "เหมาะสำหรับ",
-            items: [
-                "น้องที่เตรียมสอบความพร้อมก่อนเปิดเทอม"
-            ]
-        },
-        {
-            title: "สิ่งที่ได้รับ",
-            items: [
-                "ไฟล์เอกสารประกอบการเรียน",
-                "ไฟล์เฉลยละเอียด",
-                "ไลฟ์ VIP ถามได้ตลอดเวลาไม่เข้าใจ",
-                "คลิปย้อนหลัง ไม่มีหมดอายุ"
-            ]
-        }
-    ]
+"use client";
+
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation'; // Import useParams สำหรับ App Router client component
+import Image from 'next/image';
+
+import Link from 'next/link'; // Import Link สำหรับบทเรียน
+import styles from './courseDetail.module.css'; // <-- ตรวจสอบ Path CSS Module
+
+// --- Import Icons (ตรวจสอบ Path ให้ถูกต้อง) ---
+import defaultCourseImage from "../../img/courseimg.png"; // รูป Default
+import TimeIcon from "../../img/Time.png";
+import WatchIcon from "../../img/Watch.png";
+import LimitIcon from "../../img/Limit.png";
+import PigIcon from "../../img/Pig.png"; // ตัวอย่าง Icon อื่นๆ ถ้าจะใช้จาก DB
+
+// --- Types (ควร Import หรือกำหนดไว้ที่ส่วนกลางให้ตรงกับ API Response) ---
+type LessonInfo = {
+    id: number;
+    title: string;
+    lessonNumber: number;
 };
 
-export default function CourseDetail() {
+type CourseDetailData = {
+    id: number;
+    courseNumber: string;
+    courseName: string;
+    description: string;
+    category: string | null;
+    teacher: string | null;
+    level: string | null;
+    price: number;
+    courseImg: string | null;
+    lessons: LessonInfo[]; // <-- ต้องมี Array ของ Lessons จาก API
+    // --- Fields เพิ่มเติมที่อาจจะต้องดึงจาก DB ---
+    // learningTimeEstimate?: string; // เช่น "20 hr."
+    // courseDuration?: string; // เช่น "6 เดือน"
+    // courseAccessPeriod?: string; // เช่น "1 ปี"
+    // targetAudience?: string[]; // เช่น ["นักเรียน ม.1", "ผู้เตรียมสอบ"]
+    // courseBenefits?: string[]; // เช่น ["เอกสาร PDF", "คลิปย้อนหลัง"]
+};
+
+// --- Component หลัก ---
+export default function CourseDetailPage() {
+    const router = useRouter();
+    const params = useParams(); // Hook สำหรับดึง Route Params ใน App Router Client Component
+    const courseId = params?.courseId as string | undefined; // ดึง courseId ออกมา
+
+    const [courseData, setCourseData] = useState<CourseDetailData | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    // --- Fetch Course Data by ID ---
+    useEffect(() => {
+        if (courseId) { // ตรวจสอบว่ามี courseId ก่อน Fetch
+            setIsLoading(true);
+            setError(null);
+            console.log(`Workspaceing course details for ID: ${courseId}`);
+            fetch(`/api/courses/${courseId}`) // เรียก API GET /api/courses/[id]
+                .then(async (res) => {
+                    if (!res.ok) {
+                        const errorData = await res.json().catch(() => ({}));
+                        throw new Error(errorData.error || `Failed to fetch course (status: ${res.status})`);
+                    }
+                    return res.json();
+                })
+                .then((data: CourseDetailData) => {
+                    console.log("Course data received:", data);
+                    setCourseData(data);
+                })
+                .catch((err) => {
+                    console.error("Fetch Course Detail Error:", err);
+                    setError(err instanceof Error ? err.message : "Unknown error");
+                })
+                .finally(() => {
+                    setIsLoading(false);
+                });
+        } else {
+            // กรณีไม่มี courseId (ไม่ควรเกิดถ้า Route ถูกต้อง)
+            setError("Invalid Course ID.");
+            setIsLoading(false);
+        }
+    }, [courseId]); // ทำงานใหม่เมื่อ courseId เปลี่ยน
+
+    // --- Placeholder Handlers ---
+    const handleAddToCart = () => {
+        if (!courseData) return;
+        alert(`(ยังไม่ได้ Implement) เพิ่ม "${courseData.courseName}" ลงตะกร้า`);
+        // เพิ่ม Logic เรียก API หรือจัดการ State ตะกร้า
+    };
+
+    const handleBuyNow = () => {
+        if (!courseData) return;
+        alert(`(ยังไม่ได้ Implement) สั่งซื้อ "${courseData.courseName}"`);
+        // เพิ่ม Logic เรียก API สร้าง Checkout Session
+    };
+
+    // --- Render Loading State ---
+    if (isLoading) {
+        return <div className="flex justify-center items-center min-h-screen">Loading course details...</div>;
+    }
+
+    // --- Render Error State ---
+    if (error) {
+         return <div className="flex flex-col justify-center items-center min-h-screen text-red-600">
+            <p>Error loading course:</p>
+            <p>{error}</p>
+            <button onClick={() => router.back()} className="mt-4 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">ย้อนกลับ</button>
+         </div>;
+    }
+
+    // --- Render Not Found State ---
+    if (!courseData) {
+         return <div className="flex flex-col justify-center items-center min-h-screen text-gray-600">
+             <p>ไม่พบคอร์สเรียนที่ต้องการ</p>
+             <button onClick={() => router.back()} className="mt-4 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">ย้อนกลับ</button>
+         </div>;
+    }
+
+    // --- Render Course Details ---
+    const imageUrl = courseData.courseImg || defaultCourseImage.src;
 
     return (
-        <main className={styles.container}>
-            <Link className={styles.backBtn} href="/course">&lt; ย้อนกลับ</Link>
+
+        <main className={styles.container}> {/* ตรวจสอบ styles.container */}
+
+            <button onClick={() => router.back()} className={styles.backBtn}> {/* ทำให้ปุ่ม back ทำงาน */}
+                &lt; ย้อนกลับ
+            </button>
+        
             <section className={styles.topSection}>
+                {/* Course Image */}
                 <div className={styles.imageBox}>
                     <Image
-                        src={Course.src}
-                        alt="course book"
+                        src={imageUrl}
+                        alt={courseData.courseName || "Course image"}
                         fill
-                        className={styles.coverImage}
+                        sizes="(max-width: 768px) 100vw, 50vw" // Adjust sizes as needed
+                        className={styles.coverImage} // ตรวจสอบ style นี้
+                        style={{ objectFit: 'contain' }} // อาจจะใช้ contain หรือ cover
+                        onError={(e) => { (e.target as HTMLImageElement).src = defaultCourseImage.src; }}
                     />
                 </div>
 
+                {/* Course Info */}
                 <div className={styles.courseInfo}>
-                    <h1 className={styles.title}>{courseDetails.title}</h1>
-                    <p className={styles.code}>{courseDetails.code}</p>
+                    <h1 className={styles.title}>{courseData.courseName}</h1>
+                    <p className={styles.code}>{courseData.courseNumber}</p>
 
+                    {/* --- Stats Section (ยังใช้ข้อมูล Hardcode/รอปรับ) --- */}
                     <div className={styles.stats}>
-                        {courseDetails.stats.map((stat, index) => (
-                            <div key={index}>
-                                <Image src={stat.icon} alt={stat.label} height={50} width={50} />
-                                <p className={styles.statLabel}>{stat.label}</p>
-                                <p className={styles.statValue}>{stat.value}</p>
-                            </div>
-                        ))}
+                         {/* ตัวอย่าง ถ้าจะดึงจาก DB อาจจะต้องแก้ Model/API */}
+                        <div /* key={'learningTime'} */>
+                           <Image src={TimeIcon.src} alt="เวลาเรียน" height={40} width={40} />
+                           <p className={styles.statLabel}>เวลาเรียนรวม</p>
+                           <p className={styles.statValue}>{/* courseData.learningTimeEstimate || */ 'N/A'} </p>
+                        </div>
+                         <div /* key={'accessPeriod'} */>
+                           <Image src={LimitIcon.src} alt="อายุคอร์ส" height={40} width={40} />
+                           <p className={styles.statLabel}>อายุคอร์ส</p>
+                           <p className={styles.statValue}>{/* courseData.courseAccessPeriod || */ 'ตลอดชีพ'}</p>
+                        </div>
+                        {/* เพิ่ม Stat อื่นๆ ถ้ามีข้อมูลใน DB */}
                     </div>
+                    {/* --- จบ Stats Section --- */}
 
-                    <p className={styles.price}>{courseDetails.price}</p>
+                    <p className={styles.price}>฿{courseData.price.toLocaleString()}</p> {/* แสดงราคาจาก DB */}
 
                     <div className={styles.actions}>
-                        <button className={styles.cart}>เพิ่มลงรถเข็น</button>
-                        <button className={styles.buy}>สั่งซื้อ</button>
+                        <button onClick={handleAddToCart} className={styles.cart}>เพิ่มลงรถเข็น</button>
+                        <button onClick={handleBuyNow} className={styles.buy}>สั่งซื้อ</button>
                     </div>
                 </div>
             </section>
 
             <div className={styles.separator}></div>
 
-            {/* รายละเอียด */}
-            {courseDetails.details.map((detail, index) => (
-                <section key={index} className={styles.detailsSection}>
-                    <h3>{detail.title}</h3>
-                    {detail.items.map((item, idx) => (
-                        <p key={idx}>{item}</p>
-                    ))}
-                    <div className={styles.separator}></div>
-                </section>
-            ))}
+            {/* --- รายละเอียด (ควรดึงจาก courseData.description) --- */}
+            <section className={styles.detailsSection}>
+                <h3>รายละเอียด</h3>
+                {/* ใช้ description จาก DB (อาจจะต้อง Render HTML ถ้าเก็บเป็น HTML) */}
+                <div className={styles.descriptionContent} dangerouslySetInnerHTML={{ __html: courseData.description || '' }}></div>
+                {/* หรือถ้าเป็น Text ธรรมดา */}
+                {/* <p>{courseData.description || '-'}</p> */}
+                 <div className={styles.separator}></div>
+             </section>
 
-            {/* ตารางบทเรียน */}
+             {/* --- ส่วน เหมาะสำหรับ / สิ่งที่ได้รับ (ยัง Hardcode - รอปรับ) --- */}
+             <section className={styles.detailsSection}>
+                <h3>เหมาะสำหรับ</h3>
+                {/* ควรดึงข้อมูลจาก DB Field เช่น courseData.targetAudience */}
+                 <ul><li>น้องที่เตรียมสอบความพร้อมก่อนเปิดเทอม</li></ul>
+                 <div className={styles.separator}></div>
+             </section>
+             <section className={styles.detailsSection}>
+                 <h3>สิ่งที่ได้รับ</h3>
+                  {/* ควรดึงข้อมูลจาก DB Field เช่น courseData.courseBenefits */}
+                 <ul><li>ไฟล์เอกสารประกอบการเรียน</li><li>ไฟล์เฉลยละเอียด</li><li>ไลฟ์ VIP</li><li>คลิปย้อนหลัง</li></ul>
+                 <div className={styles.separator}></div>
+             </section>
+             {/* --- จบส่วน Hardcode --- */}
+
+
+            {/* --- ตารางบทเรียน (ดึงจาก courseData.lessons) --- */}
             <section className={styles.lessonSection}>
-                <h3 className={styles.lessonHeader}>บทเรียน</h3>
+                <h3 className={styles.lessonHeader}>บทเรียน ({courseData.lessons?.length || 0} บท)</h3>
                 <div className={styles.lessonTable}>
-                    {courseDetails.lessons.map((lesson, index) => (
-                        <button
-                            key={index}
-                            className={styles.lessonButton}
-                            onClick={() => window.location.href = lesson.link}
-                        >
-                            {lesson.title}
-                        </button>
-                    ))}
+                    {(courseData.lessons && courseData.lessons.length > 0) ? (
+                        courseData.lessons
+                           .sort((a, b) => a.lessonNumber - b.lessonNumber) // เรียงตาม lessonNumber
+                           .map((lesson) => (
+                                // ใช้ Link ของ Next.js
+                                <Link
+                                    key={lesson.id}
+                                    href={`/learn/${courseData.id}/lesson/${lesson.id}`} // <<-- สร้าง Path สำหรับหน้าเรียน
+                                    className={styles.lessonButton}
+                                >
+                                    {lesson.lessonNumber}. {lesson.title}
+                                </Link>
+                            ))
+                    ) : (
+                        <p className="text-gray-500 italic">ยังไม่มีบทเรียนสำหรับคอร์สนี้</p>
+                    )}
                 </div>
             </section>
 
-            {/* Section พิเศษ */}
-            <section className={styles.specialSection}>
-                <h3>เรียนกับ PIG CLASS ได้อะไรบ้าง</h3>
-                <div className={styles.specialImageWrapper}>
-                    <Image src={Pig.src} alt="เรียนกับ PIG CLASS ได้อะไรบ้าง" width={800} height={200} />
-                </div>
-            </section>
+             {/* --- Section พิเศษ (เหมือนเดิม) --- */}
+             <section className={styles.specialSection}>
+                 <h3>เรียนกับ PIG CLASS ได้อะไรบ้าง</h3>
+                 <div className={styles.specialImageWrapper}>
+                     <Image src={PigIcon.src} alt="เรียนกับ PIG CLASS ได้อะไรบ้าง" width={800} height={200} />
+                 </div>
+             </section>
 
         </main>
     );

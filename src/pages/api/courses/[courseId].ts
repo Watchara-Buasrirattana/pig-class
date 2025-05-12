@@ -66,12 +66,39 @@ export default async function handler(
 
 
     if (req.method === 'GET') {
-        // ... (โค้ด GET เหมือนเดิม) ...
-         try {
-            const course = await prisma.course.findUnique({ where: { id: idAsNumber } });
-            if (!course) return res.status(404).json({ error: 'Course not found' });
-            return res.status(200).json(course);
-        } catch (error) { /* ... */ }
+                // --- ดึงข้อมูล Course ตัวเดียว (สำหรับหน้า Detail) ---
+                console.log(`Workspaceing course details for ID: ${idAsNumber}`);
+                try {
+                    const course = await prisma.course.findUnique({
+                        where: { id: idAsNumber },
+                        // ******** แก้ไขตรงนี้: เพิ่ม include ********
+                        include: {
+                            lessons: { // <-- สั่งให้ดึง lessons มาด้วย
+                                orderBy: {
+                                    lessonNumber: 'asc' // เรียงตามลำดับ
+                                },
+                                 // เลือกเฉพาะ field ของ lesson ที่ต้องการก็ได้
+                                 // select: { id: true, title: true, lessonNumber: true }
+                            },
+                            documents: { // <-- อาจจะ include เอกสารมาด้วย ถ้าหน้า Detail ต้องใช้
+                                orderBy: { title: 'asc' }
+                            },
+                            // ไม่ต้อง include video ที่นี่ เพราะมันผูกกับ Lesson
+                        }
+                        // *****************************************
+                    });
+        
+                    if (!course) {
+                        console.log(`Course with ID ${idAsNumber} not found.`);
+                        return res.status(404).json({ error: 'Course not found' });
+                    }
+                    console.log(`Course ${idAsNumber} fetched successfully.`);
+                    return res.status(200).json(course); // ส่งข้อมูล Course พร้อม lessons กลับไป
+        
+                } catch (error) {
+                    console.error(`Error fetching course ${idAsNumber}:`, error);
+                    return res.status(500).json({ error: 'Failed to fetch course details.' });
+                }
 
     } else if (req.method === 'PUT') {
         // ... (โค้ด PUT เหมือนเดิม) ...
@@ -118,16 +145,18 @@ export default async function handler(
         try {
             // 1. ตรวจสอบข้อมูลที่เกี่ยวข้องที่ *ไม่ควร* ลบ (Blocking Relationships)
             const relatedEnrollments = await prisma.enrollment.findFirst({ where: { courseId: idAsNumber } });
-            const relatedOrders = await prisma.order.findFirst({ where: { courseId: idAsNumber } });
+            const relatedOrderItems = await prisma.orderItem.findFirst({ // เช็คที่ OrderItem แทน
+                where: { courseId: idAsNumber }
+            });
             // เพิ่มการตรวจสอบอื่นๆ ที่ไม่ต้องการให้ลบได้ตามต้องการ
 
             if (relatedEnrollments) {
                 console.warn(`Cannot delete course ${idAsNumber}: Found related enrollments.`);
                 return res.status(409).json({ error: 'Cannot delete course because it has active enrollments.' }); // 409 Conflict
             }
-            if (relatedOrders) {
-                 console.warn(`Cannot delete course ${idAsNumber}: Found related orders.`);
-                return res.status(409).json({ error: 'Cannot delete course because it has related orders.' }); // 409 Conflict
+            if (relatedOrderItems) { // เช็ค relatedOrderItems
+                console.warn(`Cannot delete course ${idAsNumber}: Found related order items.`);
+                return res.status(409).json({ error: 'Cannot delete course because it has been ordered.' }); // ปรับข้อความ Error
             }
 
             // 2. ค้นหาข้อมูล Course และข้อมูลลูกทั้งหมดที่จะลบ (เพื่อเอา URL ไปลบไฟล์)
@@ -195,7 +224,7 @@ export default async function handler(
 
                 // - ลบ Lessons ที่ผูกกับ Course นี้
                 await tx.lesson.deleteMany({ where: { courseId: idAsNumber } });
-
+                await tx.orderItem.deleteMany({ where: { courseId: idAsNumber }});
                 // - สุดท้าย ลบ Course เอง
                 await tx.course.delete({ where: { id: idAsNumber } });
             });

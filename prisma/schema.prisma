@@ -58,10 +58,11 @@ model Course {
   level        String?
   price        Float
   courseImg    String?
+  stripePriceId String?
   lessons      Lesson[]
   enrollments  Enrollment[]
   cartItems    CartItem[]
-  orders       Order[]
+  orderItems   OrderItem[]
   documents    Document[]
 }
 
@@ -87,22 +88,33 @@ model CartItem {
   cartId   Int
   course   Course  @relation(fields: [courseId], references: [id])
   courseId Int
-  quantity Int
+  quantity Int     @default(1)
+  @@unique([cartId, courseId])
 }
 
 model Order {
   id          Int         @id @default(autoincrement())
   user        User        @relation(fields: [userId], references: [id])
   userId      Int
-  course      Course      @relation(fields: [courseId], references: [id])
-  courseId    Int
   orderDate   DateTime    @default(now())
-  orderNumber String
+  orderNumber String      @unique
   totalPrice  Float
   status      OrderStatus @default(PENDING)
   payments    Payment[]   
+  items       OrderItem[]
+  stripeSessionId String?   @unique
 }
 
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade) // เชื่อมกับ Order ถ้าลบ Order ให้ลบ Item ด้วย
+  orderId   Int
+  course    Course  @relation(fields: [courseId], references: [id]) // เชื่อมกับ Course ที่ซื้อ
+  courseId  Int
+  quantity  Int     @default(1) // จำนวน (ปกติคอร์สออนไลน์เป็น 1)
+  price     Float   
+  @@unique([orderId, courseId])
+}
 
 model Payment {
   id           Int      @id @default(autoincrement())
@@ -113,6 +125,7 @@ model Payment {
   totalAmount  Float
   status       String
   paymentDate  DateTime @default(now())
+  stripePaymentIntentId String?  @unique
 }
 
 model Lesson {

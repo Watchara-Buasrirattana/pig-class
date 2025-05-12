@@ -1,18 +1,138 @@
+// --- PATH: app/profile/page.tsx หรือ pages/profile.tsx ---
 "use client";
-import { useEffect, useState } from "react";
-import styles from "./profile.module.css";
+
+import React, { useState, useEffect, ChangeEvent, FormEvent } from "react"; // แก้ไข Import
+import { useRouter } from "next/navigation";
+import { signOut, useSession } from "next-auth/react"; // **แนะนำ:** Import useSession
+import styles from "./profile.module.css"; // ตรวจสอบ Path
+import Image from "next/image"; // Import Image
+
+// --- Import Icons ---
 import CourseIcon from "../img/Course-icon.png";
 import InfoIcon from "../img/Profile-icon.png";
 import PaymentIcon from "../img/Payment-icon.png";
 import PigIcon from "../img/Pig-icon.png";
 import LogoutIcon from "../img/Logout-icon.png";
-import { signOut } from "next-auth/react";
+import defaultAvatar from "../img/Pig-icon.png"; // ตัวอย่างรูป Avatar Default
+import Link from "next/link";
+
+// --- Types ---
+type UserProfile = {
+  id?: number | string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string | null;
+  schoolName?: string | null;
+  studyLine?: string | null;
+  gradeLevel?: string | null;
+  role?: string; // เพิ่ม role ถ้าต้องการแสดงผล
+  profileImg?: string | null;
+  parentName?: string | null;
+  parentEmail?: string | null;
+  parentPhone?: string | null;
+  point?: number;
+};
+
+// Type สำหรับ Form (เฉพาะ Field ที่แก้ไขได้)
+type ProfileFormState = {
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  schoolName: string;
+  studyLine: string;
+  gradeLevel: string;
+  parentName: string;
+  parentEmail: string;
+  parentPhone: string;
+};
+
+type EnrolledCourseInfo = {
+  // Type นี้ควรตรงกับ select ใน API /api/my-courses
+  id: number;
+  courseName: string;
+  courseNumber: string;
+  courseImg: string | null;
+  description?: string; // Optional
+  price?: number; // Optional
+};
+type OrderItemDetail = {
+  id: number;
+  courseId: number;
+  quantity: number;
+  price: number; // ราคา ณ ตอนซื้อ
+  course: {
+    id: number;
+    courseName: string;
+    courseImg: string | null;
+    courseNumber: string;
+  };
+};
+type PaymentInfo = {
+  status: string;
+  paymentDate: string | Date;
+  totalAmount?: number; // Optional
+};
+type OrderHistoryItem = {
+  id: number;
+  orderNumber: string;
+  orderDate: string | Date;
+  totalPrice: number;
+  status: string; // OrderStatus enum (PENDING, PAID, etc.)
+  items: OrderItemDetail[];
+  payments?: PaymentInfo[]; // Optional
+};
+
+function formatDate(dateString: string | Date): string {
+  try {
+    // สร้าง Date object จาก dateString
+    const date = new Date(dateString);
+
+    // ตรวจสอบว่าเป็น Date ที่ถูกต้องหรือไม่
+    if (isNaN(date.getTime())) {
+      return "Invalid Date";
+    }
+
+    // กำหนด Options สำหรับการแสดงผลวันที่และเวลา
+    const options: Intl.DateTimeFormatOptions = {
+      year: "numeric", // ปีแบบเต็ม
+      month: "short", // เดือนแบบย่อ (เช่น ม.ค., ก.พ.)
+      day: "numeric", // วันที่
+      hour: "2-digit", // ชั่วโมง (2 หลัก)
+      minute: "2-digit", // นาที (2 หลัก)
+      hour12: false, // (Optional) ใช้ระบบ 24 ชั่วโมง (ถ้าไม่ใส่ หรือ true จะเป็น AM/PM)
+    };
+    // ใช้ toLocaleDateString เพื่อจัดรูปแบบตาม Locale ไทย
+    return date.toLocaleDateString("th-TH", options);
+  } catch (e) {
+    console.error("Error formatting date:", e);
+    return "Invalid Date"; // คืนค่าถ้าเกิด Error
+  }
+}
 
 export default function ProfilePage() {
-  const [activeMenu, setActiveMenu] = useState("courses");
+  // **แนะนำ:** ใช้ useSession แทน fetch('/api/user')
+  const { data: session, status: sessionStatus } = useSession();
+  const router = useRouter();
+  const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourseInfo[]>(
+    []
+  );
+  const [isLoadingEnrolledCourses, setIsLoadingEnrolledCourses] =
+    useState(true);
+  const [errorEnrolledCourses, setErrorEnrolledCourses] = useState<
+    string | null
+  >(null);
+  const [orderHistory, setOrderHistory] = useState<OrderHistoryItem[]>([]);
+  const [isLoadingOrderHistory, setIsLoadingOrderHistory] = useState(true);
+  const [errorOrderHistory, setErrorOrderHistory] = useState<string | null>(
+    null
+  );
+  const [activeMenu, setActiveMenu] = useState("info"); // เริ่มที่ info
   const [tab, setTab] = useState("student");
   const [isEditMode, setEditMode] = useState(false);
-  const [form, setForm] = useState({
+  const [isLoading, setIsLoading] = useState(true); // สำหรับ Loading ข้อมูล Profile
+  const [error, setError] = useState<string | null>(null);
+  const [form, setForm] = useState<ProfileFormState>({
     firstName: "",
     lastName: "",
     phoneNumber: "",
@@ -23,55 +143,218 @@ export default function ProfilePage() {
     parentEmail: "",
     parentPhone: "",
   });
-  const [originalData, setOriginalData] = useState(form);
-  const [user, setUser] = useState<any>(null);
+  const [originalData, setOriginalData] = useState<ProfileFormState>(form);
+
+  // --- Fetch User Profile Data using session ---
+  useEffect(() => {
+    if (sessionStatus === "authenticated" && session?.user?.id) {
+      setIsLoading(true);
+      setError(null);
+      // ใช้ API endpoint ที่ดึงข้อมูล Profile ของผู้ใช้ที่ login อยู่
+      fetch("/api/user") // <<-- แนะนำให้สร้าง API นี้
+        .then(async (res) => {
+          if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(
+              errorData.error ||
+                `Failed to fetch profile data (status: ${res.status})`
+            );
+          }
+          return res.json();
+        })
+        .then((data: UserProfile) => {
+          const profileData: ProfileFormState = {
+            firstName: data.firstName || "",
+            lastName: data.lastName || "",
+            phoneNumber: data.phoneNumber || "",
+            schoolName: data.schoolName || "",
+            studyLine: data.studyLine || "",
+            gradeLevel: data.gradeLevel || "",
+            parentName: data.parentName || "",
+            parentEmail: data.parentEmail || "",
+            parentPhone: data.parentPhone || "",
+          };
+          setForm(profileData);
+          setOriginalData(profileData);
+        })
+        .catch((err) => {
+          console.error("Fetch Profile Error:", err);
+          setError(
+            err instanceof Error ? err.message : "Could not load profile data."
+          );
+        })
+        .finally(() => setIsLoading(false));
+    } else if (sessionStatus === "unauthenticated") {
+      router.push("/login"); // Redirect ถ้ายังไม่ Login
+    }
+    // ถ้า status เป็น 'loading' จะแสดง Loading ข้างล่าง
+  }, [sessionStatus, session, router]);
 
   useEffect(() => {
-    fetch("/api/user")
-      .then((res) => res.json())
-      .then((data) => {
-        setUser(data);
-        setForm({
-          firstName: data.firstName || "",
-          lastName: data.lastName || "",
-          phoneNumber: data.phoneNumber || "",
-          schoolName: data.schoolName || "",
-          studyLine: data.studyLine || "",
-          gradeLevel: data.gradeLevel || "",
-          parentName: data.parentName || "",
-          parentEmail: data.parentEmail || "",
-          parentPhone: data.parentPhone || "",
-        });
-      });
-  }, []);
+    if (sessionStatus === "authenticated" && session?.user?.id) {
+      const fetchEnrolledCourses = async () => {
+        setIsLoadingEnrolledCourses(true);
+        setErrorEnrolledCourses(null);
+        try {
+          const res = await fetch("/api/my-courses");
+          if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(
+              errorData.error ||
+                `Failed to fetch enrolled courses (status: ${res.status})`
+            );
+          }
+          const data: EnrolledCourseInfo[] = await res.json();
+          setEnrolledCourses(data);
+          console.log("Enrolled courses fetched:", data);
+        } catch (err) {
+          console.error("Fetch Enrolled Courses Error:", err);
+          setErrorEnrolledCourses(
+            err instanceof Error
+              ? err.message
+              : "Could not load enrolled courses."
+          );
+        } finally {
+          setIsLoadingEnrolledCourses(false);
+        }
+      };
+      fetchEnrolledCourses();
+    }
+  }, [sessionStatus, session]);
+  useEffect(() => {
+    if (sessionStatus === "authenticated" && session?.user?.id) {
+      if (activeMenu === "orders") {
+        // Fetch เฉพาะเมื่อ Tab "ประวัติการสั่งซื้อ" ถูกเลือก
+        const fetchOrderHistory = async () => {
+          setIsLoadingOrderHistory(true);
+          setErrorOrderHistory(null);
+          try {
+            const res = await fetch("/api/orders/my-history");
+            if (!res.ok) {
+              const errorData = await res.json().catch(() => ({}));
+              throw new Error(
+                errorData.error ||
+                  `Failed to fetch order history (status: ${res.status})`
+              );
+            }
+            const data: OrderHistoryItem[] = await res.json();
+            setOrderHistory(data);
+            console.log("Order history fetched:", data);
+          } catch (err) {
+            console.error("Fetch Order History Error:", err);
+            setErrorOrderHistory(
+              err instanceof Error
+                ? err.message
+                : "Could not load order history."
+            );
+          } finally {
+            setIsLoadingOrderHistory(false);
+          }
+        };
+        fetchOrderHistory();
+      }
+    }
+  }, [sessionStatus, session, activeMenu]);
 
-  const handleChange = (e: any) => {
+  // --- Handlers ---
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSave = async () => {
-    const res = await fetch("/api/user", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    if (res.ok) {
-      const updated = await res.json();
-      setUser(updated);
+    setIsLoading(true); // หรือ isSaving state
+    setError(null);
+    try {
+      const res = await fetch("/api/user", {
+        // <<-- API สำหรับ Update
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(
+          errorData.error || `Failed to update profile (status: ${res.status})`
+        );
+      }
+      const updatedProfile: UserProfile = await res.json();
+      // อัปเดต Form และ Original Data ด้วยข้อมูลใหม่
+      const updatedFormData: ProfileFormState = {
+        firstName: updatedProfile.firstName || "",
+        lastName: updatedProfile.lastName || "",
+        phoneNumber: updatedProfile.phoneNumber || "",
+        schoolName: updatedProfile.schoolName || "",
+        studyLine: updatedProfile.studyLine || "",
+        gradeLevel: updatedProfile.gradeLevel || "",
+        parentName: updatedProfile.parentName || "",
+        parentEmail: updatedProfile.parentEmail || "",
+        parentPhone: updatedProfile.parentPhone || "",
+      };
+      setForm(updatedFormData);
+      setOriginalData(updatedFormData);
       setEditMode(false);
+      alert("บันทึกข้อมูลสำเร็จ!");
+      // ควรจะอัปเดต session ด้วย session.update() ถ้าต้องการให้ชื่อใน sidebar เปลี่ยนทันที
+    } catch (err) {
+      console.error("Save Profile Error:", err);
+      const errorMsg = err instanceof Error ? err.message : "Unknown error";
+      setError(`บันทึกข้อมูลไม่สำเร็จ: ${errorMsg}`);
+      // ไม่ต้อง alert เพราะจะแสดง error ใน UI
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // if (!user) return <p>Loading...</p>
+  const handleCancelEdit = () => {
+    setForm(originalData);
+    setEditMode(false);
+    setError(null); // Clear error on cancel
+  };
 
+  // --- Loading / Unauthenticated Check ---
+  if (sessionStatus === "loading" || isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading...
+      </div>
+    );
+  }
+  // useEffect จะจัดการ redirect ถ้า unauthenticated
+  if (!session?.user) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Please log in.
+      </div>
+    );
+  }
+
+  // --- JSX Structure (แก้ไขให้ถูกต้อง) ---
   return (
     <div className={styles.container}>
-      {/* Sidebar */}
+      {/* --- Sidebar (Rendered Once) --- */}
       <aside className={styles.sidebar}>
         <div className={styles.avatarBox}>
-          <img src={PigIcon.src} alt="avatar" className={styles.avatar} />
-          <div className="font-semibold">
-            {user?.firstName} {user?.lastName}
+          <Image
+            src={session.user.image || defaultAvatar.src} // ใช้รูปจาก session หรือ default
+            alt="avatar"
+            width={80} // กำหนดขนาดให้ชัดเจน
+            height={80}
+            className={styles.avatar} // ใช้ style จาก css module
+          />
+          <div className="font-semibold mt-2">
+            {" "}
+            {/* เพิ่ม margin top */}
+            {/* ใช้ชื่อจาก session (ถ้ามี) หรือจาก form/user state */}
+            {session.user.name ||
+              `${form.firstName} ${form.lastName}`.trim() ||
+              session.user.email}
+            {session.user.role && (
+              <span className="block text-xs text-gray-300 capitalize mt-1">
+                ({session.user.role})
+              </span>
+            )}
           </div>
         </div>
         <ul className={styles.sidebarMenu}>
@@ -83,14 +366,19 @@ export default function ProfilePage() {
           ].map(({ key, icon, label }) => (
             <li
               key={key}
-              onClick={() => setActiveMenu(key)}
+              onClick={() => {
+                if (!isEditMode) setActiveMenu(key);
+                else alert("กรุณาบันทึกหรือยกเลิกการแก้ไขก่อนเปลี่ยนเมนู");
+              }}
               className={`${styles.menuItem} ${
                 activeMenu === key ? styles.active : ""
+              } ${
+                isEditMode ? "cursor-not-allowed opacity-70" : "cursor-pointer"
               }`}
             >
               <div className="flex items-center gap-2">
-                <img
-                  src={icon.src}
+                <Image
+                  src={icon}
                   alt={`icon-${key}`}
                   width={25}
                   height={25}
@@ -102,366 +390,436 @@ export default function ProfilePage() {
               </div>
             </li>
           ))}
+          {/* Logout Button */}
           <li
-            // --- เปลี่ยน onClick ตรงนี้ ---
             onClick={() => {
-              // (Optional) เพิ่มการยืนยันก่อน Logout
+              if (isEditMode) {
+                alert("กรุณาบันทึกหรือยกเลิกการแก้ไขก่อนออกจากระบบ");
+                return;
+              }
               if (window.confirm("คุณต้องการออกจากระบบใช่หรือไม่?")) {
-                signOut({ callbackUrl: "/login" }); // <-- เรียก signOut และกำหนดหน้าที่จะไปหลัง Logout (เช่น หน้าแรก)
+                signOut({ callbackUrl: "/login" }); // ไปหน้า Login หลัง Logout
               }
             }}
-            className={`${styles.menuItem} text-red-600 hover:underline mt-4 cursor-pointer`} // <-- เพิ่ม cursor-pointer
+            className={`${
+              styles.menuItem
+            } text-red-400 hover:bg-red-600 hover:text-white mt-4 ${
+              isEditMode ? "cursor-not-allowed opacity-70" : "cursor-pointer"
+            }`}
           >
-            <img
-              src={LogoutIcon.src}
-              alt="icon"
+            <Image
+              src={LogoutIcon}
+              alt="logout icon"
               width={25}
               height={25}
               className={styles.menuIcon}
-            />{" "}
+            />
             <span className="ml-2">ออกจากระบบ</span>
           </li>
         </ul>
       </aside>
-      {/* Content Area */}
+      {/* --- Content Area (Rendered Once) --- */}
       <div className={styles.content}>
+        {/* --- ส่วนแสดง Error ทั่วไปของหน้านี้ --- */}
+        {error && (
+          <div
+            className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded"
+            role="alert"
+          >
+            {error}
+          </div>
+        )}
+
+        {/* --- Conditional Rendering based on activeMenu --- */}
         {activeMenu === "courses" && (
           <div>
             <h2 className={styles.titleWithBar}>
-              <span className={styles.blueBar}></span>
-              คอร์สของฉัน
+              <span className={styles.blueBar}></span>คอร์สของฉัน
             </h2>
-            <div className={styles.card} style={{ width: "16rem" }}>
-              <p className="font-medium mb-1">
-                คณิตศาสตร์ ม.2 ก่อนเปิดภาคเรียนที่ 1
-              </p>
-              <p className="text-sm text-gray-400 mb-2">รหัส M05</p>
-              <img src="/course-cover.png" alt="course" className="mb-2" />
-              <p className="text-right text-gray-600 mb-3">999 บาท</p>
-              <button className="bg-blue-600 text-white w-full py-2 rounded">
-                เข้าเรียน
-              </button>
+            {isLoadingEnrolledCourses && (
+              <p className="text-gray-500">กำลังโหลดคอร์สของคุณ...</p>
+            )}
+            {errorEnrolledCourses && (
+              <p className="text-red-500">Error: {errorEnrolledCourses}</p>
+            )}
+
+            {!isLoadingEnrolledCourses &&
+              !errorEnrolledCourses &&
+              (enrolledCourses.length > 0 ? (
+                <div className={styles.courseListGrid}>
+                  {" "}
+                  {/* สร้าง Class นี้ใน CSS เพื่อจัดเรียง Card */}
+                  {enrolledCourses.map((course) => (
+                    // --- ใช้ CourseCard Component ที่เรามี (ต้องแน่ใจว่า Prop เข้ากันได้) ---
+                    // --- หรือสร้าง Component ใหม่สำหรับแสดง Enrolled Course Card ---
+                    <div
+                      key={course.id}
+                      className={styles.courseCardItem}
+                      style={{ width: "16rem" }}
+                    >
+                      {" "}
+                      {/* Style สำหรับแต่ละ Card */}
+                      <Image
+                        src={course.courseImg || defaultAvatar.src} // ใช้ defaultAvatar ถ้า courseImg ไม่มี
+                        alt={course.courseName || "Course Image"}
+                        width={250} // ปรับขนาดตามต้องการ
+                        height={150}
+                        className="rounded-md object-cover w-full" // ให้เต็มความกว้างของ Card
+                      />
+                      <h3
+                        className="font-medium mb-1"
+                        title={course.courseName}
+                      >
+                        {course.courseName}
+                      </h3>
+                      <p className="text-xs text-gray-500 mb-2">
+                        รหัส {course.courseNumber}
+                      </p>
+                      <p className="text-right text-gray-400 mb-3">
+                        {course.price} บาท
+                      </p>
+                      {/* อาจจะเพิ่ม Description สั้นๆ */}
+                      {/* <p className="text-sm text-gray-600 line-clamp-2">{course.description}</p> */}
+                      <Link
+                        href={`/learn/${course.id}`} // <<-- Path ไปยังหน้าเรียนของคอร์สนั้น
+                        className="mt-3 block w-full text-center bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors"
+                      >
+                        เข้าเรียน
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 italic">
+                  คุณยังไม่ได้ลงทะเบียนคอร์สเรียนใดๆ
+                </p>
+              ))}
+          </div>
+        )}
+
+        {activeMenu === "info" && (
+          <div>
+            <h2 className={styles.titleWithBar}>
+              <span className={styles.blueBar}></span>ข้อมูลส่วนตัว
+            </h2>
+            <div className={styles.tabBar}>
+              <div
+                className={`${styles.tab} ${
+                  tab === "student" ? styles.active : ""
+                }`}
+                onClick={() => setTab("student")}
+              >
+                นักเรียน
+              </div>
+              <div
+                className={`${styles.tab} ${
+                  tab === "parent" ? styles.active : ""
+                }`}
+                onClick={() => setTab("parent")}
+              >
+                ผู้ปกครอง
+              </div>
+            </div>
+            {/* ใช้ Form ครอบเพื่อใหปุ่ม Save/Cancel ทำงานกับ form ได้ */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSave();
+              }}
+            >
+              <div className={styles.formGrid}>
+                {tab === "student" ? (
+                  <>
+                    <div>
+                      <label className={styles.label}>ชื่อ</label>
+                      <input
+                        className={styles.input}
+                        type="text"
+                        placeholder="ชื่อ"
+                        name="firstName"
+                        value={form.firstName}
+                        onChange={handleChange}
+                        disabled={!isEditMode}
+                      />
+                    </div>
+                    <div>
+                      <label className={styles.label}>นามสกุล</label>
+                      <input
+                        className={styles.input}
+                        type="text"
+                        placeholder="นามสกุล"
+                        name="lastName"
+                        value={form.lastName}
+                        onChange={handleChange}
+                        disabled={!isEditMode}
+                      />
+                    </div>
+                    <div>
+                      <label className={styles.label}>E-mail</label>
+                      <input
+                        className={styles.input}
+                        type="email"
+                        value={session.user.email!}
+                        disabled
+                      />
+                    </div>
+                    <div>
+                      <label className={styles.label}>เบอร์โทรศัพท์</label>
+                      <input
+                        className={styles.input}
+                        type="tel"
+                        placeholder="เบอร์โทรศัพท์"
+                        name="phoneNumber"
+                        value={form.phoneNumber || ""}
+                        onChange={handleChange}
+                        disabled={!isEditMode}
+                      />
+                    </div>
+                    <div>
+                      <label className={styles.label}>โรงเรียน</label>
+                      <input
+                        className={styles.input}
+                        type="text"
+                        placeholder="โรงเรียน"
+                        name="schoolName"
+                        value={form.schoolName || ""}
+                        onChange={handleChange}
+                        disabled={!isEditMode}
+                      />
+                    </div>
+                    <div>
+                      <label className={styles.label}>สายการเรียน</label>
+                      <input
+                        className={styles.input}
+                        type="text"
+                        placeholder="สายการเรียน"
+                        name="studyLine"
+                        value={form.studyLine || ""}
+                        onChange={handleChange}
+                        disabled={!isEditMode}
+                      />
+                    </div>
+                    <div>
+                      <label className={styles.label}>ระดับชั้น</label>
+                      <input
+                        className={styles.input}
+                        type="text"
+                        placeholder="ระดับชั้น"
+                        name="gradeLevel"
+                        value={form.gradeLevel || ""}
+                        onChange={handleChange}
+                        disabled={!isEditMode}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  // Parent Tab
+                  <>
+                    <div>
+                      <label className={styles.label}>ชื่อผู้ปกครอง</label>
+                      <input
+                        className={styles.input}
+                        type="text"
+                        placeholder="ชื่อ - นามสกุล"
+                        name="parentName"
+                        value={form.parentName || ""}
+                        onChange={handleChange}
+                        disabled={!isEditMode}
+                      />
+                    </div>
+                    <div>
+                      <label className={styles.label}>E-mail ผู้ปกครอง</label>
+                      <input
+                        className={styles.input}
+                        type="email"
+                        placeholder="E-mail"
+                        name="parentEmail"
+                        value={form.parentEmail || ""}
+                        onChange={handleChange}
+                        disabled={!isEditMode}
+                      />
+                    </div>
+                    <div>
+                      <label className={styles.label}>
+                        เบอร์โทรศัพท์ผู้ปกครอง
+                      </label>
+                      <input
+                        className={styles.input}
+                        type="tel"
+                        placeholder="เบอร์โทรศัพท์"
+                        name="parentPhone"
+                        value={form.parentPhone || ""}
+                        onChange={handleChange}
+                        disabled={!isEditMode}
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+              {/* Edit/Save/Cancel Buttons */}
+              <div className="flex justify-end gap-4 mt-6 border-t pt-4">
+                {isEditMode ? (
+                  <>
+                    <button
+                      type="button"
+                      className={styles.buttonOutline}
+                      onClick={handleCancelEdit}
+                      disabled={isLoading}
+                    >
+                      ยกเลิก
+                    </button>
+                    {/* ปุ่ม Save อยู่ใน form ใช้ type="submit" ได้ */}
+                    <button
+                      type="submit"
+                      className={styles.button}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? "กำลังบันทึก..." : "บันทึก"}
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    className={styles.button}
+                    onClick={() => {
+                      setOriginalData(form);
+                      setEditMode(true);
+                    }}
+                    disabled={isLoading}
+                  >
+                    แก้ไข
+                  </button>
+                )}
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* --- Order History Section --- */}
+        {activeMenu === "orders" && (
+          <div>
+            <h2 className={styles.titleWithBar}>
+              <span className={styles.blueBar}></span>ประวัติการสั่งซื้อ
+            </h2>
+            {isLoadingOrderHistory && (
+              <p className="text-gray-500">กำลังโหลดประวัติการสั่งซื้อ...</p>
+            )}
+            {errorOrderHistory && (
+              <p className="text-red-500">Error: {errorOrderHistory}</p>
+            )}
+
+            {!isLoadingOrderHistory &&
+              !errorOrderHistory &&
+              (orderHistory.length > 0 ? (
+                <div className="space-y-6">
+                  {orderHistory.map((order) => (
+                    <div
+                      key={order.id}
+                      className={`${styles.card} p-4 shadow-lg`}
+                    >
+                      <div className="flex justify-between items-start mb-3 pb-3 border-b">
+                        <div>
+                          <p className="text-sm text-gray-500">
+                            Order Number:{" "}
+                            <span className="font-medium text-gray-700">
+                              {order.orderNumber}
+                            </span>
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            Date:{" "}
+                            <span className="font-medium text-gray-700">
+                              {formatDate(order.orderDate)}
+                            </span>
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-lg font-semibold">
+                            ฿{order.totalPrice.toLocaleString()}
+                          </p>
+                          <span
+                            className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                              order.status === "PAID"
+                                ? "bg-green-100 text-green-700"
+                                : order.status === "PENDING"
+                                ? "bg-yellow-100 text-yellow-700"
+                                : "bg-red-100 text-red-700"
+                            }`}
+                          >
+                            {order.status}
+                          </span>
+                        </div>
+                      </div>
+                      <h4 className="text-md font-semibold mb-2">
+                        รายการในคำสั่งซื้อ:
+                      </h4>
+                      <ul className="space-y-2">
+                        {order.items.map((item) => (
+                          <li
+                            key={item.id}
+                            className="flex items-center gap-3 p-2 border-b border-gray-100 last:border-b-0"
+                          >
+                            <Image
+                              src={item.course.courseImg || defaultAvatar.src}
+                              alt={item.course.courseName}
+                              width={48}
+                              height={32} // สัดส่วนอาจจะปรับ
+                              className="rounded object-cover"
+                            />
+                            <div className="flex-grow">
+                              <p className="text-sm font-medium text-gray-800">
+                                {item.course.courseName}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                รหัส: {item.course.courseNumber}
+                              </p>
+                            </div>
+                            <div className="text-sm text-gray-700 text-right">
+                              <p>จำนวน: {item.quantity}</p>
+                              <p>ราคา: ฿{item.price.toLocaleString()}</p>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                      {/* (Optional) แสดงข้อมูล Payment */}
+                      {order.payments && order.payments.length > 0 && (
+                        <div className="mt-2 pt-2 border-t text-xs text-gray-500">
+                          Payment: {order.payments[0].status} on{" "}
+                          {formatDate(order.payments[0].paymentDate)}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 italic">
+                  คุณยังไม่มีประวัติการสั่งซื้อ
+                </p>
+              ))}
+          </div>
+        )}
+
+        {activeMenu === "points" && (
+          <div>
+            <h2 className={styles.titleWithBar}>
+              <span className={styles.blueBar}></span>แต้มการสะสม
+            </h2>
+            <p>(ส่วนแสดงแต้ม ยังไม่ได้ Implement)</p>
+            <div className={styles.pointsCard}>
+              <p>เหรียญ pig</p>
+              <Image
+                src="/pig-coin.png"
+                alt="pig coin"
+                width={40}
+                height={40}
+                className="mx-auto my-2"
+              />
+              {/* ควรใช้ Point จาก User state ที่ fetch มา */}
+              <p className="text-2xl font-bold">{/* user?.point ?? 0 */ 5}</p>
             </div>
           </div>
         )}
-        return (
-        <div className={styles.container}>
-          {/* Sidebar */}
-          <aside className={styles.sidebar}>
-            <div className={styles.avatarBox}>
-              <img src={PigIcon.src} alt="avatar" className={styles.avatar} />
-              <div className="font-semibold">
-                {user?.firstName} {user?.lastName}
-              </div>
-            </div>
-            <ul className={styles.sidebarMenu}>
-              {[
-                { key: "courses", icon: CourseIcon, label: "คอร์สของฉัน" },
-                { key: "info", icon: InfoIcon, label: "ข้อมูลส่วนตัว" },
-                {
-                  key: "orders",
-                  icon: PaymentIcon,
-                  label: "ประวัติการสั่งซื้อ",
-                },
-                { key: "points", icon: PigIcon, label: "แต้มการสะสม" },
-              ].map(({ key, icon, label }) => (
-                <li
-                  key={key}
-                  onClick={() => setActiveMenu(key)}
-                  className={`${styles.menuItem} ${
-                    activeMenu === key ? styles.active : ""
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <img
-                      src={icon.src}
-                      alt={`icon-${key}`}
-                      width={25}
-                      height={25}
-                      className={`${styles.menuIcon} ${
-                        activeMenu === key ? "" : "grayscale"
-                      }`}
-                    />
-                    {label}
-                  </div>
-                </li>
-              ))}
-              <li
-                onClick={() => alert("ออกจากระบบ")}
-                className={`${styles.menuItem} text-red-600 hover:underline mt-4`}
-              >
-                <img
-                  src={LogoutIcon.src}
-                  alt="icon"
-                  width={25}
-                  height={25}
-                  className={styles.menuIcon}
-                />{" "}
-                <span className="ml-2">ออกจากระบบ</span>
-              </li>
-            </ul>
-          </aside>
-
-          {/* Content Area */}
-          <div className={styles.content}>
-            {activeMenu === "courses" && (
-              <div>
-                <h2 className={styles.titleWithBar}>
-                  <span className={styles.blueBar}></span>
-                  คอร์สของฉัน
-                </h2>
-                <div className={styles.card} style={{ width: "16rem" }}>
-                  <p className="font-medium mb-1">
-                    คณิตศาสตร์ ม.2 ก่อนเปิดภาคเรียนที่ 1
-                  </p>
-                  <p className="text-sm text-gray-400 mb-2">รหัส M05</p>
-                  <img src="/course-cover.png" alt="course" className="mb-2" />
-                  <p className="text-right text-gray-600 mb-3">999 บาท</p>
-                  <button className="bg-blue-600 text-white w-full py-2 rounded">
-                    เข้าเรียน
-                  </button>
-                </div>
-              </div>
-            )}
-            {activeMenu === "info" && (
-              <div>
-                <h2 className={styles.titleWithBar}>
-                  <span className={styles.blueBar}></span>
-                  ข้อมูลส่วนตัว
-                </h2>
-
-                <div className={styles.tabBar}>
-                  <div
-                    className={`${styles.tab} ${
-                      tab === "student" ? styles.active : ""
-                    }`}
-                    onClick={() => setTab("student")}
-                  >
-                    นักเรียน
-                  </div>
-                  <div
-                    className={`${styles.tab} ${
-                      tab === "parent" ? styles.active : ""
-                    }`}
-                    onClick={() => setTab("parent")}
-                  >
-                    ผู้ปกครอง
-                  </div>
-                </div>
-                <div className={styles.formGrid}>
-                  {tab === "student" ? (
-                    <>
-                      <div>
-                        <label className={styles.label}>ชื่อ</label>
-                        <input
-                          className={styles.input}
-                          type="text"
-                          placeholder="ชื่อ"
-                          name="firstName"
-                          value={form.firstName}
-                          onChange={handleChange}
-                          disabled={!isEditMode}
-                        />
-                      </div>
-                      <div>
-                        <label className={styles.label}>นามสกุล</label>
-                        <input
-                          className={styles.input}
-                          type="text"
-                          placeholder="นามสกุล"
-                          name="lastName"
-                          value={form.lastName}
-                          onChange={handleChange}
-                          disabled={!isEditMode}
-                        />
-                      </div>
-                      <div>
-                        <label className={styles.label}>E-mail</label>
-                        <input
-                          className={styles.input}
-                          type="email"
-                          value={user?.email || ""}
-                          disabled
-                        />
-                      </div>
-                      <div>
-                        <label className={styles.label}>เบอร์โทรศัพท์</label>
-                        <input
-                          className={styles.input}
-                          type="tel"
-                          placeholder="เบอร์โทรศัพท์"
-                          name="phoneNumber"
-                          value={form.phoneNumber}
-                          onChange={handleChange}
-                          disabled={!isEditMode}
-                        />
-                      </div>
-                      <div>
-                        <label className={styles.label}>โรงเรียน</label>
-                        <input
-                          className={styles.input}
-                          type="text"
-                          placeholder="โรงเรียน"
-                          name="schoolName"
-                          value={form.schoolName}
-                          onChange={handleChange}
-                          disabled={!isEditMode}
-                        />
-                      </div>
-                      <div>
-                        <label className={styles.label}>สายการเรียน</label>
-                        <input
-                          className={styles.input}
-                          type="text"
-                          placeholder="สายการเรียน"
-                          name="studyLine"
-                          value={form.studyLine}
-                          onChange={handleChange}
-                          disabled={!isEditMode}
-                        />
-                      </div>
-                      <div>
-                        <label className={styles.label}>ระดับชั้น</label>
-                        <input
-                          className={styles.input}
-                          type="text"
-                          placeholder="ระดับชั้น"
-                          name="gradeLevel"
-                          value={form.gradeLevel}
-                          onChange={handleChange}
-                          disabled={!isEditMode}
-                        />
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div>
-                        <label className={styles.label}>ชื่อ - นามสกุล</label>
-                        <input
-                          className={styles.input}
-                          type="text"
-                          placeholder="ชื่อ - นามสกุล"
-                          name="parentName"
-                          value={form.parentName || ""}
-                          onChange={handleChange}
-                          disabled={!isEditMode}
-                        />
-                      </div>
-                      <div>
-                        <label className={styles.label}>E-mail</label>
-                        <input
-                          className={styles.input}
-                          type="email"
-                          placeholder="E-mail"
-                          name="parentEmail"
-                          value={form.parentEmail || ""}
-                          onChange={handleChange}
-                          disabled={!isEditMode}
-                        />
-                      </div>
-                      <div>
-                        <label className={styles.label}>เบอร์โทรศัพท์</label>
-                        <input
-                          className={styles.input}
-                          type="tel"
-                          placeholder="เบอร์โทรศัพท์"
-                          name="parentPhone"
-                          value={form.parentPhone || ""}
-                          onChange={handleChange}
-                          disabled={!isEditMode}
-                        />
-                      </div>
-                    </>
-                  )}
-                </div>
-                <div className="flex justify-end gap-4">
-                  {isEditMode ? (
-                    <>
-                      <button
-                        className={styles.button}
-                        onClick={() => {
-                          setForm(originalData);
-                          setEditMode(false);
-                        }}
-                        style={{ borderColor: "#DC2626", color: "#DC2626" }}
-                      >
-                        ยกเลิก
-                      </button>
-                      <button
-                        className={styles.button}
-                        onClick={() => {
-                          handleSave();
-                          setOriginalData(form);
-                        }}
-                      >
-                        บันทึก
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      className={styles.button}
-                      onClick={() => {
-                        setOriginalData(form);
-                        setEditMode(true);
-                      }}
-                    >
-                      แก้ไข
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {activeMenu === "orders" && (
-              <div>
-                <h2 className={styles.titleWithBar}>
-                  <span className={styles.blueBar}></span>
-                  ประวัติการสั่งซื้อ
-                </h2>
-                <div
-                  className={`${styles.card} flex items-center gap-4 max-w-3xl`}
-                >
-                  <img
-                    src="/course-cover.png"
-                    alt="order"
-                    className="w-24 h-auto rounded"
-                  />
-                  <div className="flex-1">
-                    <p className="font-medium">
-                      คณิตศาสตร์ ม.2 ก่อนเปิดภาคเรียนที่ 1
-                    </p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      สั่งซื้อเมื่อ: 12 กันยา 2568
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      เลขที่คำสั่งซื้อ: 2225566
-                    </p>
-                  </div>
-                  <div className="text-right text-lg text-gray-600">฿999</div>
-                </div>
-              </div>
-            )}
-
-            {activeMenu === "points" && (
-              <div>
-                <h2 className={styles.titleWithBar}>
-                  <span className={styles.blueBar}></span>
-                  แต้มการสะสม
-                </h2>
-                <div className={styles.pointsCard}>
-                  <p className="text-lg font-semibold">เหรียญ pig</p>
-                  <img
-                    src="/pig-coin.png"
-                    alt="pig coin"
-                    className="w-10 h-10 mx-auto my-2"
-                  />
-                  <p className="text-2xl font-bold">5</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
+      </div>{" "}
+      {/* End Content Area */}
+    </div> // End Container
   );
 }

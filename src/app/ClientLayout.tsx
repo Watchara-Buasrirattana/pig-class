@@ -7,8 +7,12 @@ import { SessionProvider } from 'next-auth/react'
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname() || "";
 
-    const hideNavbarFooter = ["/login"];
-    const shouldHide = hideNavbarFooter.includes(pathname);
+    const hideNavbarFooterPaths = ["/login", "/register"]; // เฉพาะ path นี้
+    const hideNavbarFooterStartsWith = []; // ตั้งแต่ path นี้เป็นต้นไป
+
+    const shouldHide = 
+    hideNavbarFooterPaths.includes(pathname) ||
+    hideNavbarFooterStartsWith.some((path) => pathname.startsWith(path));
 
     return (
         <>

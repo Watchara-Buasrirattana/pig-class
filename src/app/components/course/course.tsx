@@ -54,8 +54,7 @@ function CourseCard({ course }: { course: CourseFromAPI }) {
     } catch (err) {
       console.error("Error adding to cart:", err);
       alert(
-        `เกิดข้อผิดพลาดในการเพิ่มลงตะกร้า: ${
-          err instanceof Error ? err.message : "Unknown error"
+        `เกิดข้อผิดพลาดในการเพิ่มลงตะกร้า: ${err instanceof Error ? err.message : "Unknown error"
         }`
       );
     } finally {
@@ -95,9 +94,8 @@ function CourseCard({ course }: { course: CourseFromAPI }) {
         <button
           onClick={() => handleAddToCart(course.id)}
           disabled={isAddingToCart}
-          className={`${styles.cartButton} ${
-            isAddingToCart ? "opacity-50 cursor-wait" : ""
-          }`} // เพิ่ม Style และ Disable ตอน Loading
+          className={`${styles.cartButton} ${isAddingToCart ? "opacity-50 cursor-wait" : ""
+            }`} // เพิ่ม Style และ Disable ตอน Loading
           title="หยิบใส่ตะกร้า"
         >
           <span className={styles.cartIcon}>🛒</span>{" "}
@@ -120,7 +118,7 @@ function CourseCard({ course }: { course: CourseFromAPI }) {
 // --- Filter Options (Hardcoded - อาจจะดึงจาก API หรือ DB ในอนาคต) ---
 const levels = ["ม.1", "ม.2", "ม.3", "ม.4", "ม.5", "ม.6"];
 // **สำคัญ:** ค่าใน types นี้ ต้องตรงกับค่าที่เป็นไปได้ใน field `category` ของ Course ใน DB
-const types = ["กลางภาค", "ปลายภาค", "พื้นฐาน", "ตะลุยโจทย์"];
+const types = ["กลางภาค", "ปลายภาค", "พื้นฐาน", "ตะลุยโจทย์", "ทดลองเรียน"];
 
 export default function CoursePage() {
   // --- State สำหรับ Filter ---
@@ -131,6 +129,7 @@ export default function CoursePage() {
   const [allDbCourses, setAllDbCourses] = useState<CourseFromAPI[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // --- Fetch ข้อมูล Course ทั้งหมด ---
   useEffect(() => {
@@ -172,29 +171,18 @@ export default function CoursePage() {
   // --- กรองข้อมูลจาก State ที่ดึงมาจาก DB ---
   // ใช้ useMemo เพื่อให้คำนวณใหม่เฉพาะตอนที่ allDbCourses หรือ filter เปลี่ยน
   const filteredCourses = useMemo(() => {
-    console.log(
-      "Filtering courses. Levels:",
-      selectedLevels,
-      "Types:",
-      selectedTypes
-    ); // Debug log
     return allDbCourses.filter((course) => {
-      // ตรวจสอบ Level (ใช้ course.level จาก API)
-      // ทำให้เป็น Case-insensitive หรือ Normalization ถ้าจำเป็น
       const levelMatch =
-        selectedLevels.length === 0 ||
-        (course.level && selectedLevels.includes(course.level));
-
-      // ตรวจสอบ Type (ใช้ course.category จาก API)
-      // ทำให้เป็น Case-insensitive หรือ Normalization ถ้าจำเป็น
+        selectedLevels.length === 0 || (course.level && selectedLevels.includes(course.level));
       const typeMatch =
-        selectedTypes.length === 0 ||
-        (course.category && selectedTypes.includes(course.category));
-
-      // console.log(`Course: ${course.courseName}, Level: ${course.level}, Category: ${course.category}, levelMatch: ${levelMatch}, typeMatch: ${typeMatch}`); // Detailed Debug
-      return levelMatch && typeMatch;
+        selectedTypes.length === 0 || (course.category && selectedTypes.includes(course.category));
+      const searchMatch =
+        searchQuery === "" || course.courseName.toLowerCase().includes(searchQuery.toLowerCase());
+      return levelMatch && typeMatch && searchMatch;
     });
-  }, [allDbCourses, selectedLevels, selectedTypes]);
+  }, [allDbCourses, selectedLevels, selectedTypes, searchQuery]);
+
+  
 
   return (
     // อาจจะต้องมี Layout หลักครอบ (เช่น Navbar, Footer)
@@ -204,7 +192,15 @@ export default function CoursePage() {
       {/* Sidebar สำหรับ Filter */}
       <aside className={styles.sidebar}>
         {" "}
-        {/* ตรวจสอบ style นี้ */}
+        <div className={styles.searchWrapper}>
+          <input
+            type="text"
+            placeholder="ค้นหาคอร์สเรียน..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className={styles.searchInput}
+          />
+        </div>
         <h3 className={styles.sidebarTitle}>ระดับชั้น</h3>
         {levels.map((level) => (
           <label key={level} className={styles.checkboxLabel}>

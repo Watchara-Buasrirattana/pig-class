@@ -40,6 +40,18 @@
     flex-direction: column;
 }
 
+.searchWrapper {
+    margin-bottom: 1.5rem;
+}
+
+.searchInput {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border: 1px solid #A1A1A1;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
 .pageTitle {
     font-size: 2rem;
     font-weight: bold;
@@ -97,8 +109,9 @@
     margin-top: 1rem;
 }
 
-.cart {
+.cartIcon {
     font-size: 1.5rem;
+    cursor: pointer;
 }
 
 .detailBtn {

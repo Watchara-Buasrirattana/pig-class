@@ -103,19 +103,19 @@ export default function CourseDetailPage() {
 
     // --- Render Error State ---
     if (error) {
-         return <div className="flex flex-col justify-center items-center min-h-screen text-red-600">
+        return <div className="flex flex-col justify-center items-center min-h-screen text-red-600">
             <p>Error loading course:</p>
             <p>{error}</p>
             <button onClick={() => router.back()} className="mt-4 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">ย้อนกลับ</button>
-         </div>;
+        </div>;
     }
 
     // --- Render Not Found State ---
     if (!courseData) {
-         return <div className="flex flex-col justify-center items-center min-h-screen text-gray-600">
-             <p>ไม่พบคอร์สเรียนที่ต้องการ</p>
-             <button onClick={() => router.back()} className="mt-4 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">ย้อนกลับ</button>
-         </div>;
+        return <div className="flex flex-col justify-center items-center min-h-screen text-gray-600">
+            <p>ไม่พบคอร์สเรียนที่ต้องการ</p>
+            <button onClick={() => router.back()} className="mt-4 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">ย้อนกลับ</button>
+        </div>;
     }
 
     // --- Render Course Details ---
@@ -128,7 +128,7 @@ export default function CourseDetailPage() {
             <button onClick={() => router.back()} className={styles.backBtn}> {/* ทำให้ปุ่ม back ทำงาน */}
                 &lt; ย้อนกลับ
             </button>
-        
+
             <section className={styles.topSection}>
                 {/* Course Image */}
                 <div className={styles.imageBox}>
@@ -150,16 +150,16 @@ export default function CourseDetailPage() {
 
                     {/* --- Stats Section (ยังใช้ข้อมูล Hardcode/รอปรับ) --- */}
                     <div className={styles.stats}>
-                         {/* ตัวอย่าง ถ้าจะดึงจาก DB อาจจะต้องแก้ Model/API */}
+                        {/* ตัวอย่าง ถ้าจะดึงจาก DB อาจจะต้องแก้ Model/API */}
                         <div /* key={'learningTime'} */>
-                           <Image src={TimeIcon.src} alt="เวลาเรียน" height={40} width={40} />
-                           <p className={styles.statLabel}>เวลาเรียนรวม</p>
-                           <p className={styles.statValue}>{/* courseData.learningTimeEstimate || */ 'N/A'} </p>
+                            <Image src={TimeIcon.src} alt="เวลาเรียน" height={40} width={40} />
+                            <p className={styles.statLabel}>เวลาเรียนรวม</p>
+                            <p className={styles.statValue}>{/* courseData.learningTimeEstimate || */ 'N/A'} </p>
                         </div>
-                         <div /* key={'accessPeriod'} */>
-                           <Image src={LimitIcon.src} alt="อายุคอร์ส" height={40} width={40} />
-                           <p className={styles.statLabel}>อายุคอร์ส</p>
-                           <p className={styles.statValue}>{/* courseData.courseAccessPeriod || */ 'ตลอดชีพ'}</p>
+                        <div /* key={'accessPeriod'} */>
+                            <Image src={LimitIcon.src} alt="อายุคอร์ส" height={40} width={40} />
+                            <p className={styles.statLabel}>อายุคอร์ส</p>
+                            <p className={styles.statValue}>{/* courseData.courseAccessPeriod || */ 'ตลอดชีพ'}</p>
                         </div>
                         {/* เพิ่ม Stat อื่นๆ ถ้ามีข้อมูลใน DB */}
                     </div>
@@ -183,23 +183,23 @@ export default function CourseDetailPage() {
                 <div className={styles.descriptionContent} dangerouslySetInnerHTML={{ __html: courseData.description || '' }}></div>
                 {/* หรือถ้าเป็น Text ธรรมดา */}
                 {/* <p>{courseData.description || '-'}</p> */}
-                 <div className={styles.separator}></div>
-             </section>
+                <div className={styles.separator}></div>
+            </section>
 
-             {/* --- ส่วน เหมาะสำหรับ / สิ่งที่ได้รับ (ยัง Hardcode - รอปรับ) --- */}
-             <section className={styles.detailsSection}>
+            {/* --- ส่วน เหมาะสำหรับ / สิ่งที่ได้รับ (ยัง Hardcode - รอปรับ) --- */}
+            <section className={styles.detailsSection}>
                 <h3>เหมาะสำหรับ</h3>
                 {/* ควรดึงข้อมูลจาก DB Field เช่น courseData.targetAudience */}
-                 <ul><li>น้องที่เตรียมสอบความพร้อมก่อนเปิดเทอม</li></ul>
-                 <div className={styles.separator}></div>
-             </section>
-             <section className={styles.detailsSection}>
-                 <h3>สิ่งที่ได้รับ</h3>
-                  {/* ควรดึงข้อมูลจาก DB Field เช่น courseData.courseBenefits */}
-                 <ul><li>ไฟล์เอกสารประกอบการเรียน</li><li>ไฟล์เฉลยละเอียด</li><li>ไลฟ์ VIP</li><li>คลิปย้อนหลัง</li></ul>
-                 <div className={styles.separator}></div>
-             </section>
-             {/* --- จบส่วน Hardcode --- */}
+                <ul><li>น้องที่เตรียมสอบความพร้อมก่อนเปิดเทอม</li></ul>
+                <div className={styles.separator}></div>
+            </section>
+            <section className={styles.detailsSection}>
+                <h3>สิ่งที่ได้รับ</h3>
+                {/* ควรดึงข้อมูลจาก DB Field เช่น courseData.courseBenefits */}
+                <ul><li>ไฟล์เอกสารประกอบการเรียน</li><li>ไฟล์เฉลยละเอียด</li><li>ไลฟ์ VIP</li><li>คลิปย้อนหลัง</li></ul>
+                <div className={styles.separator}></div>
+            </section>
+            {/* --- จบส่วน Hardcode --- */}
 
 
             {/* --- ตารางบทเรียน (ดึงจาก courseData.lessons) --- */}
@@ -208,8 +208,8 @@ export default function CourseDetailPage() {
                 <div className={styles.lessonTable}>
                     {(courseData.lessons && courseData.lessons.length > 0) ? (
                         courseData.lessons
-                           .sort((a, b) => a.lessonNumber - b.lessonNumber) // เรียงตาม lessonNumber
-                           .map((lesson) => (
+                            .sort((a, b) => a.lessonNumber - b.lessonNumber) // เรียงตาม lessonNumber
+                            .map((lesson) => (
                                 // ใช้ Link ของ Next.js
                                 <Link
                                     key={lesson.id}
@@ -225,13 +225,13 @@ export default function CourseDetailPage() {
                 </div>
             </section>
 
-             {/* --- Section พิเศษ (เหมือนเดิม) --- */}
-             <section className={styles.specialSection}>
-                 <h3>เรียนกับ PIG CLASS ได้อะไรบ้าง</h3>
-                 <div className={styles.specialImageWrapper}>
-                     <Image src={PigIcon.src} alt="เรียนกับ PIG CLASS ได้อะไรบ้าง" width={800} height={200} />
-                 </div>
-             </section>
+            {/* --- Section พิเศษ (เหมือนเดิม) --- */}
+            <section className={styles.specialSection}>
+                <h3>เรียนกับ PIG CLASS ได้อะไรบ้าง</h3>
+                <div className={styles.specialImageWrapper}>
+                    <Image src={PigIcon.src} alt="เรียนกับ PIG CLASS ได้อะไรบ้าง" width={800} height={200} />
+                </div>
+            </section>
 
         </main>
     );

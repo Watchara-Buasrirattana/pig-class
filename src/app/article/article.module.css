@@ -42,7 +42,12 @@
 }
 
 .articleCard {
-    text-align: left;
+  text-align: left;
+  /* เพิ่ม overflow: hidden ถ้าต้องการให้ Card มีมุมมนแล้วรูปไม่ล้น */
+  /* border-radius: 8px; */
+  /* overflow: hidden; */
+  display: flex; /* อาจจะใช้ flex เพื่อจัดเรียงเนื้อหาภายใน Card */
+  flex-direction: column;
 }
 
 .articleCardEmpty {
@@ -104,4 +109,16 @@
     .articleGrid {
         grid-template-columns: 1fr;
     }
+}
+
+.articleImageContainer {
+  width: 100%; /* ให้กว้างเต็ม Card */
+  aspect-ratio: 16 / 9; /* <<-- กำหนดสัดส่วนรูปภาพที่ต้องการ เช่น 16:9, 4:3, 1:1 */
+  /* หรือถ้าไม่ใช้ aspect-ratio ก็กำหนด height คงที่ */
+  /* height: 180px; */
+  position: relative;   /* <<-- สำคัญมากเมื่อ Image ใช้ fill prop */
+  overflow: hidden;      /* ซ่อนส่วนที่เกินของ Image */
+  margin-bottom: 0.75rem; /* ระยะห่างจาก Title (ถ้ามี) */
+  background-color: #f0f0f0; /* สี Placeholder */
+  border-radius: 6px; /* มุมมนสำหรับกรอบรูป (ถ้าต้องการ) */
 }

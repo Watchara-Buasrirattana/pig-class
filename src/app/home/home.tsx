@@ -317,15 +317,49 @@ export default function Home() {
         </div>
       </section>
 
-      <section className={styles.doctorPigSection}>
-        <div className={styles.imageContainer}>
-          <Image
-            src={guide.src}
-            alt="ครูหมู"
-            fill
-            className={styles.imageFull}
-          />
-        </div>
+      {/* --- Courses --- */}
+      <section className={styles.recommendSection}>
+        <h2 className={styles.title}>คอร์สทดลองเรียน</h2>
+
+        {/* --- แสดงสถานะ Loading หรือ Error --- */}
+        {isLoadingCourses && (
+          <p className="text-center py-4">Loading courses...</p>
+        )}
+        {errorCourses && (
+          <p className="text-center py-4 text-red-600">
+            Error loading courses: {errorCourses}
+          </p>
+        )}
+
+        {/* --- แสดงคอร์สเมื่อโหลดเสร็จและไม่มี Error --- */}
+        {!isLoadingCourses && !errorCourses && (
+          <>
+            {/* First 4 */}
+            <div className={styles.courseList}>
+              {/* ใช้ fetchedCourses ที่ได้จาก API */}
+              {firstCourses.map((course) => (
+                <CourseCard key={course.id} course={course} /> // ส่ง course object ทั้งหมดไปเลย
+              ))}
+            </div>
+            {/* ปุ่ม ดูทั้งหมด (แสดงเมื่อมีคอร์สมากกว่า 4 และยังไม่ได้กดดูทั้งหมด) */}
+            {fetchedCourses.length > 4 && (
+              <div className="text-center mt-4">
+                {" "}
+                {/* อาจจะจัดสไตล์ให้เหมือนปุ่ม */}
+                <Link href="/course" className={styles.viewAll}>
+                  {" "}
+                  {/* <<-- ใช้ Link และ href */}
+                  ดูคอร์สเรียนทั้งหมด
+                </Link>
+              </div>
+            )}
+            {fetchedCourses.length === 0 && (
+              <p className="text-center text-gray-500 py-4">
+                ยังไม่มีคอร์สทดลองเรียนในขณะนี้
+              </p>
+            )}
+          </>
+        )}
       </section>
 
       <section className={styles.doctorPigSection2}>

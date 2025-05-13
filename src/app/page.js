@@ -1,5 +1,5 @@
 import HomePage from "./home/home"
-import Test from "./components/achievement/achievement"
+import Test from "./learn/page"
 
 export default function Home() {
   return (

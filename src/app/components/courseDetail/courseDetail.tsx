@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation'; // Import useParams สำหรับ App Router client component
 import Image from 'next/image';
+
 import Link from 'next/link'; // Import Link สำหรับบทเรียน
 import styles from './courseDetail.module.css'; // <-- ตรวจสอบ Path CSS Module
 
@@ -121,12 +122,13 @@ export default function CourseDetailPage() {
     const imageUrl = courseData.courseImg || defaultCourseImage.src;
 
     return (
+
         <main className={styles.container}> {/* ตรวจสอบ styles.container */}
 
             <button onClick={() => router.back()} className={styles.backBtn}> {/* ทำให้ปุ่ม back ทำงาน */}
                 &lt; ย้อนกลับ
             </button>
-
+        
             <section className={styles.topSection}>
                 {/* Course Image */}
                 <div className={styles.imageBox}>

@@ -102,11 +102,12 @@
 @media (max-width: 1024px) {
     .articleGrid {
         grid-template-columns: repeat(2, 1fr);
+        justify-items: center;
     }
 }
 
 @media (max-width: 600px) {
-    .articleGrid {
+     .articleGrid {
         grid-template-columns: 1fr;
     }
 }

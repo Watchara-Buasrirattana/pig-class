@@ -257,7 +257,7 @@ export default function Home() {
         <div className={styles.hallOfFrameHeader}>
           <h2 className={styles.hallOfFrameTitle}></h2>
           <h2 className={styles.hallOfFrameTitle}>ความสำเร็จ</h2>
-          <a href="/hallOfFrame" className={styles.viewAll}>
+          <a href="/achievement" className={styles.viewAll}>
             ดูทั้งหมด
           </a>
         </div>
@@ -311,7 +311,7 @@ export default function Home() {
         </div>
 
         <div className={styles.articleButtonWrapper}>
-          <a href="/articles" className={styles.viewAllBtn}>
+          <a href="/article" className={styles.viewAllBtn}>
             ดูทั้งหมด
           </a>
         </div>

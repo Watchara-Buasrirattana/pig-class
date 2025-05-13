@@ -16,10 +16,12 @@
     "@stripe/stripe-js": "^7.3.0",
     "bcryptjs": "^3.0.2",
     "formidable": "^3.5.4",
+    "micro": "^10.0.1",
     "next": "^15.2.4",
     "next-auth": "^4.24.11",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-responsive-carousel": "^3.2.23",
     "stripe": "^18.1.0"
   },
   "devDependencies": {

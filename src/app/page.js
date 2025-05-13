@@ -3,6 +3,6 @@ import Test from "./learn/page"
 
 export default function Home() {
   return (
-      <Test />
+      <HomePage />
   )
 }

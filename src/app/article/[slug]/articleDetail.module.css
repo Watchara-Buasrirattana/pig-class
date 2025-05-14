@@ -1,192 +1,213 @@
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 40px 20px;
-    font-family: 'Prompt', sans-serif;
-  }
-  
-  .backLink {
-    margin-bottom: 20px;
-  }
-  
-  .backLink a {
-    text-decoration: none;
-    color: #007acc;
-    font-size: 16px;
-  }
-  
-  /* หัวเรื่อง */
-  .title {
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 10px;
-  }
-  
-  .date {
-    font-size: 14px;
-    color: #777;
-    margin-bottom: 30px;
-  }
-  
-  /* เนื้อหาแบบ 2 คอลัมน์ */
-  .contentSection {
-    display: flex;
-    justify-content: space-between;
-    gap: 40px;
-    margin-bottom: 60px;
-  }
-  
-  /* ด้านซ้าย: รูป + เนื้อหา */
-  .leftContent {
-    flex: 2;
-  }
-  
-  .leftContent h3 {
-    margin-top: 20px;
-    font-size: 20px;
+/* articleDetail.module.css */
+.pageContainer {
+  max-width: 900px; /* หรือตาม Layout ของคุณ */
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.articleDetailContainer {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.backLink {
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+.backLink a {
+  color: #3b82f6; /* blue-500 */
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+.backLink a:hover {
+  text-decoration: underline;
+}
+
+.articleTitleDetail { /* ใช้ชื่อ class ใหม่สำหรับ title ในหน้า detail */
+  font-size: 2.5rem; /* ปรับขนาดตามต้องการ */
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #1f2937; /* gray-800 */
+  line-height: 1.2;
+}
+
+.metaInfo {
+  font-size: 0.875rem; /* text-sm */
+  color: #6b7280; /* text-gray-500 */
+  margin-bottom: 2rem;
+  display: flex;
+  gap: 1rem;
+}
+
+/* --- Carousel Styles --- */
+.carouselWrapper {
+  margin-bottom: 2rem;
+  max-width: 300px;
+  border-radius: 8px;
+  overflow: hidden; /* สำหรับกรณีที่รูปอาจจะมีมุมไม่พอดี */
+  background-color: #f9fafb; /* สีพื้นหลังอ่อนๆ */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.mainCarousel .carousel .slide {
+  background: #f9fafb; /* สีพื้นหลังของแต่ละ Slide */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 450px; /* <<-- กำหนดความสูงของ Carousel (ปรับได้) */
+}
+
+.mainCarousel .carousel .slide img {
+  max-height: 100%; /* ให้รูปสูงไม่เกิน Slide */
+  max-width: 100%;
+  object-fit: contain !important; /* บังคับให้เห็นทั้งรูป */
+  border-radius: 4px; /* มุมรูปเล็กน้อย (ถ้าต้องการ) */
+}
+
+.mainCarousel .carousel .thumbs-wrapper {
+  margin-top: 10px;
+}
+.mainCarousel .carousel .thumb {
+  border: 2px solid transparent;
+  border-radius: 4px;
+  padding: 3px;
+  height: 60px; /* ขนาด Thumbs */
+  width: auto !important; /* ให้ปรับตามสัดส่วน */
+}
+.mainCarousel .carousel .thumb.selected,
+.mainCarousel .carousel .thumb:hover {
+  border-color: #3b82f6; /* สี highlight */
+}
+.mainCarousel .carousel .thumb img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+}
+/* ----------------------- */
+
+/* --- Fallback for single coverImage (ถ้า Carousel ไม่มีรูป) --- */
+.articleCoverImageWrapper {
+  width: 100%;
+  max-width: 700px; /* <<-- ลองลดค่านี้ดู เช่น 600px หรือ 500px */
+  margin-left: auto;
+  margin-right: auto;
+  aspect-ratio: 16 / 9; /* <<-- หรือลองเปลี่ยนสัดส่วนนี้ หรือใช้ height */
+  /* height: 400px; */ /* <<-- ลองใช้ height แทน aspect-ratio ดู */
+  position: relative;   /* <<-- ต้องมี! */
+  margin-bottom: 2rem;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background-color: #f3f4f6;
+}
+.articleCoverImage {
+  /* ถ้าใช้ fill และ objectFit ใน style prop ของ Image, class นี้อาจจะไม่ต้องทำอะไรมาก
+     แต่ถ้าใส่ border-radius ที่นี่ ก็จะเห็นผลที่ตัว Image เอง */
+  border-radius: 0.5rem;
+}
+.articleContentBody {
+  margin-top: 1.5rem;
+  font-size: 1.125rem; /* text-lg */
+  line-height: 1.8;
+  color: #374151; /* text-gray-700 */
+}
+/* เพิ่ม Style สำหรับ Elements ที่อาจจะมาจาก dangerouslySetInnerHTML */
+.articleContentBody p,
+.articleContentBody ul,
+.articleContentBody ol { margin-bottom: 1.25em; }
+.articleContentBody h2 { font-size: 1.75rem; font-weight: 600; margin-top: 1.75em; margin-bottom: 0.75em; }
+.articleContentBody h3 { font-size: 1.5rem; font-weight: 600; margin-top: 1.5em; margin-bottom: 0.6em; }
+.articleContentBody a { color: #2563eb; text-decoration: underline; }
+.articleContentBody img { max-width: 100%; height: auto; border-radius: 0.375rem; margin: 1.25em 0; }
+.articleContentBody blockquote { border-left: 4px solid #d1d5db; padding-left: 1em; margin: 1.25em 0; font-style: italic; color: #4b5563;}
+.articleContentBody pre { background-color: #f3f4f6; padding: 1em; border-radius: 0.375rem; overflow-x: auto; margin: 1.25em 0;}
+
+
+.separator {
+  border-top: 1px solid #e5e7eb;
+  margin: 2.5rem 0;
+}
+
+/* --- Related Articles --- */
+.relatedArticlesSection {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e5e7eb;
+}
+.relatedHeader {
+  font-size: 1.75rem; /* text-2xl */
+  font-weight: 600;   /* font-semibold */
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #1f2937;
+}
+.relatedGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* ปรับขนาด Card */
+  gap: 1.5rem;
+}
+.relatedCard { /* Style คล้าย ArticleCard ในหน้า List */
+  display: block;
+  background-color: #fff;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  transition: box-shadow 0.2s ease-in-out;
+  text-decoration: none;
+  color: inherit;
+}
+.relatedCard:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.relatedImageContainer {
+  width: 100%;
+  aspect-ratio: 16 / 10; /* สัดส่วนรูปสำหรับ Related Card */
+  position: relative;
+  background-color: #f0f0f0;
+}
+
+.relatedTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.75rem 0.75rem 0.25rem;
+  line-height: 1.3;
+  min-height: 3em; /* สำหรับ 2 บรรทัด */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.relatedCategory {
+  font-size: 0.8rem;
+  color: #3b82f6;
+  padding: 0 0.75rem 0.75rem;
+  display: block;
+}
+/* --- (ตัวอย่าง Section พิเศษ ถ้ามี) --- */
+.specialSection {
+  margin-top: 3rem;
+  text-align: center;
+  padding: 2rem 0;
+  background-color: #f9fafb; /* สีพื้นหลังอ่อนๆ */
+  border-radius: 8px;
+}
+.specialSection h3 {
+    font-size: 1.5rem;
     font-weight: 600;
-  }
-  
-  /* เนื้อหาบทความ */
-  .articleBody {
-    margin-top: 20px;
-  }
-  
-  .articleBody p {
-    font-size: 16px;
-    line-height: 1.8;
-    white-space: pre-line;
-    color: #333;
-  }
-  
-  /* Sidebar ด้านขวา */
-  .rightSidebar {
-    flex: 1;
-    background-color: #f7f7f7;
-    padding: 20px;
-    border-radius: 12px;
-    height: fit-content;
-  }
-  
-  .rightSidebar h4 {
-    font-size: 18px;
-    margin-bottom: 10px;
-  }
-  
-  .rightSidebar ul {
-    list-style: none;
-    padding-left: 0;
-  }
-  
-  .rightSidebar li {
-    font-size: 16px;
-    margin-bottom: 8px;
-  }
-  
-  /* บทความที่เกี่ยวข้อง */
-  .containerrelated {
-    background-color: #e9f5ff;
-    padding: 1rem;
-  }
-  
-  .relatedHeader {
-    font-size: 22px;
-    font-weight: 700;
-    margin-bottom: 20px;
-    text-align: center;
-  }
-  
-  .relatedGrid {
-    display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 2rem;
-      max-width: 1200px;
-      margin: 0 auto;
-  }
-  
-  .relatedCard {
-    border-radius: 16px;
-    padding: 12px;
-    transition: transform 0.2s ease;
-    text-decoration: none;
-    color: inherit;
-  }
-  
-  .relatedCard:hover {
-    transform: translateY(-4px);
-  }
-  
-  .relatedCard img {
-    width: 100%;
-    height: auto;
-    border-radius: 10px;
-  }
-  
-  .relatedCard p {
-    font-size: 16px;
-    font-weight: 600;
-    margin: 12px 0 4px;
-    color: #333;
-  }
-  
-  .relatedCard span {
-    font-size: 14px;
-    color: #007acc;
-  }
-  
-  /* Responsive */
-  @media (max-width: 1024px) {
-    .contentSection {
-      flex-direction: column;
-    }
-  
-    .relatedGrid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-  
-  .leftContent {
-    display: flex;
-    gap: 20px;
-    flex: 2;
-    align-items: flex-start;
-  }
-  
-  /* คอลัมน์ซ้าย (ภาพ) */
-  .imageWrapper {
-    flex-shrink: 0;
-  }
-  
-  /* คอลัมน์ขวา (เนื้อหา) */
-  .articleBody {
-    flex: 1;
-  }
-  
-  .articleBody h3 {
-    margin-top: 0;
-    font-size: 20px;
-    font-weight: 600;
-  }
-  
-  .articleBody p {
-    font-size: 16px;
-    line-height: 1.8;
-    white-space: pre-line;
-    color: #333;
-  }
-  
-  
-  @media (max-width: 640px) {
-    .title {
-      font-size: 22px;
-    }
-  
-    .relatedGrid {
-      grid-template-columns: 1fr;
-    }
-  
-    .relatedCard p {
-      font-size: 15px;
-    }
-  }
-  
+    margin-bottom: 1.5rem;
+    color: #111827;
+}
+.specialImageWrapper {
+  margin-top: 1rem;
+  display: inline-block;
+  max-width: 100%;
+  height: auto; /* ให้ปรับตาม width ที่ Image component กำหนด */
+}
+.specialImageWrapper img { /* ถ้า Image component render img tag โดยตรง */
+    max-width: 100%;
+    height: auto !important; /* Override inline style ถ้า Image component ใส่มา */
+    object-fit: contain;
+}

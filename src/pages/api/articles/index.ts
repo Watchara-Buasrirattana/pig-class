@@ -11,19 +11,37 @@ export default async function handler(
     res: NextApiResponse
 ) {
     if (req.method === 'GET') {
-        // --- (Optional) GET Handler to list articles ---
         try {
+            // อาจจะเพิ่ม Logic การแบ่งหน้า (Pagination) ที่นี่เลยก็ได้ถ้าบทความเยอะมาก
+            // const page = parseInt(req.query.page as string, 10) || 1;
+            // const limit = parseInt(req.query.limit as string, 10) || 16; // สมมติหน้าละ 16 บทความ
+            // const skip = (page - 1) * limit;
+
             const articles = await prisma.article.findMany({
-                 orderBy: { publishedAt: 'desc'},
-                 include: {
-                    category: { select: { name: true } },
-                    images: { orderBy: { id: 'asc' } } // ดึงรูปมาด้วย
+                orderBy: { publishedAt: 'desc' },
+                // skip: skip, // ถ้าทำ Pagination
+                // take: limit,  // ถ้าทำ Pagination
+                include: {
+                    category: { // ดึงชื่อ Category มาด้วย
+                        select: { name: true }
+                    },
+                    images: { // ดึงรูปภาพมาด้วย (อาจจะเอาแค่รูปแรกมาเป็น Cover ใน List)
+                        orderBy: { order: 'asc' }, // หรือ id: 'asc'
+                        take: 1 // เอามาแค่รูปเดียวสำหรับหน้า List
+                    }
+                    // ไม่ต้อง include user ถ้าเราตกลงกันว่าจะไม่ผูก Article กับ User แล้ว
                 }
-             });
-             return res.status(200).json(articles);
+            });
+
+            // const totalArticles = await prisma.article.count(); // ถ้าทำ Pagination
+            // const totalPages = Math.ceil(totalArticles / limit);
+
+            // res.status(200).json({ articles, currentPage: page, totalPages, totalArticles }); // ถ้าทำ Pagination
+            res.status(200).json(articles); // แบบง่าย (ยังไม่ Pagination ใน API)
+
         } catch (error) {
-             console.error("Error fetching articles:", error);
-             return res.status(500).json({ error: 'Failed to fetch articles.' });
+            console.error("Error fetching articles:", error);
+            res.status(500).json({ error: 'Failed to fetch articles.' });
         }
 
     } else if (req.method === 'POST') {

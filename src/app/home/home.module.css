@@ -143,18 +143,18 @@
     align-items: center;
 }
 
+.imageContainer {
+    position: relative;
+    width: 90%;
+    height: 90%;
+}
+
 .doctorPigSection2 {
     height: 70vh;
     background-color: #ffffff;
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-.imageContainer {
-    position: relative;
-    width: 90%;
-    height: 90%;
 }
 
 .imageContainer2 {
@@ -179,11 +179,7 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
-}
-
-.hallOfFrameTitle {
-    font-size: 36px;
-    font-weight: bold;
+    justify-items: center;
 }
 
 .hallOfFrameGrid {
@@ -206,13 +202,6 @@
     text-align: center;
     padding: 3rem 1rem;
     background-color: #F3F7FF;
-}
-
-.articleTitle {
-    font-size: 40px;
-    font-weight: bold;
-    margin-bottom: 2rem;
-    color: #0363D5;
 }
 
 .tabList {
@@ -288,13 +277,6 @@
     text-align: center;
 }
 
-.socialTitle {
-    font-size: 32px;
-    font-weight: bold;
-    color: #0043CC;
-    margin-bottom: 2rem;
-}
-
 .socialGrid {
     display: flex;
     justify-content: center;
@@ -339,15 +321,258 @@
 }
 
 @media (max-width:834px) {
+    .title {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .courseList {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        justify-items: center;
+    }
+
+    .courseCard {
+        width: 200px;
+        text-align: center;
+    }
+
+    .imageWrapper {
+        margin-bottom: 1rem;
+    }
+
+    .price {
+        font-weight: bold;
+        font-size: 18px;
+        margin-bottom: 0.5rem;
+    }
+
+    .courseTitle {
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+    .code {
+        color: #C9C9C9;
+        font-size: 12px;
+        margin-bottom: 1rem;
+    }
+
+    .viewAll {
+        font-size: 20px;
+        margin-top: 1rem;
+    }
+
     .doctorPigSection {
         height: 45vh;
     }
 
+    .articleTabSection {
+        padding: 2rem 1rem;
+    }
+
+    .tabItem {
+        font-size: 24px;
+    }
+
+    .activeTab {
+        border-bottom: 2px solid #0363D5;
+    }
+
     .articleGrid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .articleName {
+        font-size: 18px;
+    }
+
+    .articleLink {
+        font-size: 16px;
+    }
+
+    .articleButtonWrapper {
+        margin-top: 1rem;
+    }
+
+    .doctorPigSection2 {
+        height: 35vh;
+    }
+
+    .imageContainer2 {
+        position: relative;
+        width: 70%;
+        height: 70%;
+    }
+
+    .hallOfFrameSection {
+        padding: 2rem 1rem;
+        background-color: #fff;
+        max-width: 1200px;
+        margin: 0rem auto;
+    }
+
+    .hallOfFrameHeader {
+        margin-bottom: 1rem;
+    }
+
+    .viewAllBtn {
+        font-size: 18px;
+    }
+
+    .socialSection {
+        height: 30vh;
+        padding: 1rem 1rem;
+    }
+
+    .socialGrid {
+        display: flex;
+        justify-content: center;
+        gap: 2.5rem;
+        flex-wrap: wrap;
+    }
+
+    .socialItem {
+        margin-top: 1rem;
+    }
+
+    .socialImage {
+        height: 50px;
+        width: 50px;
+    }
+
+    .socialLabel {
+        margin-top: 1rem;
+        font-size: 18px;
+        font-weight: 700;
+    }
 }
+
+@media (max-width: 450px) {
+
+    .prev,
+    .next {
+        font-size: 1rem;
+        padding: 0.25rem 0.5rem;
+    }
+
+    .recommendSection {
+        padding: 1rem 1rem;
+    }
+
+    .title {
+        font-size: 20px;
+    }
+
+    .courseCard {
+        width: 150px;
+        text-align: center;
+    }
+
+    .imageWrapper {
+        margin-bottom: 0.5rem;
+    }
+
+    .price {
+        font-weight: bold;
+        font-size: 16px;
+        margin-bottom: 0.5rem;
+    }
+
+    .courseTitle {
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .code {
+        color: #C9C9C9;
+        font-size: 10px;
+        margin-bottom: 1rem;
+    }
+
+    .detailBtn {
+        padding: 0.3rem 1rem;
+        font-size: 16px;
+    }
+
+    .viewAll {
+        font-size: 18px;
+    }
+
+    .doctorPigSection {
+        height: 35vh;
+    }
+
+    .hallOfFrameGrid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .articleTabSection {
+        padding: 1rem 1rem;
+    }
+
+    .tabList {
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .tabItem {
+        font-size: 16px;
+    }
+
+    .articleName {
+        font-size: 14px;
+    }
+
+    .articleLink {
+        font-size: 12px;
+    }
+
+    .articleButtonWrapper {
+        margin-top: 0.5rem;
+    }
+
+    .viewAllBtn {
+        font-size: 16px;
+        padding: 0.5rem 1.5rem;
+    }
+
+    .doctorPigSection2 {
+        height: 20vh;
+    }
+
+    .imageContainer2 {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    .socialSection {
+        height: 20vh;
+        padding: 1rem 1rem;
+    }
+
+    .socialGrid {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .socialItem {
+        margin-top: 1rem;
+    }
+
+    .socialImage {
+        height: 30px;
+        width: 30px;
+    }
+
+    .socialLabel {
+        margin-top: 1rem;
+        font-size: 10px;
+        font-weight: 700;
+    }
 }

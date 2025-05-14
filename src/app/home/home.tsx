@@ -7,7 +7,6 @@ import banner from "../img/banner1.png";
 import defaultCourseImage from "../img/recom-course.png";
 import teacher from "../img/Teacher.png";
 import hallOfFlame from "../img/hallOfFlame.png";
-import guide from "../img/guide.png";
 import benefit from "../img/benefit.png";
 import line from "../img/line.png";
 import facebook from "../img/facebook.png";
@@ -17,8 +16,6 @@ import youtube from "../img/youtube.png";
 import article1 from "../img/article1.png";
 import article2 from "../img/article2.png";
 import article3 from "../img/article3.png";
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 
 type CourseFromAPI = {
   id: number;
@@ -255,8 +252,8 @@ export default function Home() {
 
       <section className={styles.hallOfFrameSection}>
         <div className={styles.hallOfFrameHeader}>
-          <h2 className={styles.hallOfFrameTitle}></h2>
-          <h2 className={styles.hallOfFrameTitle}>ความสำเร็จ</h2>
+          <h2 className={styles.title}></h2>
+          <h2 className={styles.title}>ความสำเร็จ</h2>
           <a href="/hallOfFrame" className={styles.viewAll}>
             ดูทั้งหมด
           </a>
@@ -277,7 +274,7 @@ export default function Home() {
       </section>
 
       <section className={styles.articleTabSection}>
-        <h2 className={styles.articleTitle}>บทความ</h2>
+        <h2 className={styles.title}>บทความ</h2>
 
         {/* Tabs */}
         <div className={styles.tabList}>
@@ -374,7 +371,7 @@ export default function Home() {
       </section>
 
       <section className={styles.socialSection}>
-        <h2 className={styles.socialTitle}>ช่องทางการติดตาม</h2>
+        <h2 className={styles.title}>ช่องทางการติดตาม</h2>
         <div className={styles.socialGrid}>
           {socials.map((social, idx) => (
             <a
@@ -389,6 +386,7 @@ export default function Home() {
                 alt={social.name}
                 width={60}
                 height={60}
+                className={styles.socialImage}
               />
               <p className={styles.socialLabel}>{social.label}</p>
             </a>

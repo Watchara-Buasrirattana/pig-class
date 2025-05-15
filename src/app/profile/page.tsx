@@ -1,7 +1,13 @@
 // --- PATH: app/profile/page.tsx หรือ pages/profile.tsx ---
 "use client";
 
-import React, { useState, useEffect, ChangeEvent, FormEvent } from "react"; // แก้ไข Import
+import React, {
+  useState,
+  useEffect,
+  ChangeEvent,
+  FormEvent,
+  useRef,
+} from "react"; // แก้ไข Import
 import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react"; // **แนะนำ:** Import useSession
 import styles from "./profile.module.css"; // ตรวจสอบ Path
@@ -112,7 +118,7 @@ function formatDate(dateString: string | Date): string {
 
 export default function ProfilePage() {
   // **แนะนำ:** ใช้ useSession แทน fetch('/api/user')
-  const { data: session, status: sessionStatus } = useSession();
+  const { data: session, status: sessionStatus, update } = useSession();
   const router = useRouter();
   const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourseInfo[]>(
     []
@@ -144,6 +150,18 @@ export default function ProfilePage() {
     parentPhone: "",
   });
   const [originalData, setOriginalData] = useState<ProfileFormState>(form);
+  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
+  const [profilePreviewUrl, setProfilePreviewUrl] = useState<string | null>(
+    null
+  );
+  const [isUploadingProfileImg, setIsUploadingProfileImg] = useState(false);
+  const [profileImgUpdateError, setProfileImgUpdateError] = useState<
+    string | null
+  >(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const triggerFileInput = () => {
+    fileInputRef.current?.click(); // สั่งให้ input ที่ซ่อนไว้ .click()
+  };
 
   // --- Fetch User Profile Data using session ---
   useEffect(() => {
@@ -176,6 +194,11 @@ export default function ProfilePage() {
           };
           setForm(profileData);
           setOriginalData(profileData);
+          if (data.profileImg) {
+            setProfilePreviewUrl(data.profileImg);
+          } else {
+            setProfilePreviewUrl(PigIcon.src); // หรือ defaultAvatar.src
+          }
         })
         .catch((err) => {
           console.error("Fetch Profile Error:", err);
@@ -306,13 +329,123 @@ export default function ProfilePage() {
       setIsLoading(false);
     }
   };
-
+  const handleProfileImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      // Optional: Client-side validation (type, size)
+      if (file.size > 2 * 1024 * 1024) {
+        // เช่น ไม่เกิน 2MB
+        alert("ขนาดไฟล์รูปภาพต้องไม่เกิน 2MB");
+        e.target.value = ""; // เคลียร์ input
+        return;
+      }
+      setProfileImageFile(file);
+      if (profilePreviewUrl && profilePreviewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(profilePreviewUrl); // Cleanup URL เก่าที่เป็น blob
+      }
+      setProfilePreviewUrl(URL.createObjectURL(file));
+      setProfileImgUpdateError(null); // เคลียร์ Error เก่า
+    }
+  };
   const handleCancelEdit = () => {
     setForm(originalData);
     setEditMode(false);
     setError(null); // Clear error on cancel
   };
+  useEffect(() => {
+    const currentPreview = profilePreviewUrl;
+    return () => {
+      if (currentPreview && currentPreview.startsWith("blob:")) {
+        URL.revokeObjectURL(currentPreview);
+      }
+    };
+  }, [profilePreviewUrl]);
+  const handleProfileImageUploadAndSave = async () => {
+    if (!profileImageFile) {
+      alert("กรุณาเลือกรูปภาพใหม่ก่อน");
+      return;
+    }
+    if (!session?.user?.id) {
+      alert("ไม่พบข้อมูลผู้ใช้ กรุณา Login ใหม่");
+      return;
+    }
 
+    setIsUploadingProfileImg(true);
+    setProfileImgUpdateError(null);
+    let newImageUrl = "";
+
+    // 1. อัปโหลดรูปภาพใหม่
+    const imgFormData = new FormData();
+    imgFormData.append("file", profileImageFile);
+    try {
+      console.log("Uploading new profile image...");
+      const uploadRes = await fetch("/api/upload-image", {
+        // ใช้ API Upload เดิม
+        method: "POST",
+        body: imgFormData,
+      });
+      if (!uploadRes.ok) {
+        const errorData = await uploadRes.json().catch(() => ({}));
+        throw new Error(
+          errorData.error || `Image upload failed (status: ${uploadRes.status})`
+        );
+      }
+      const uploadResult = await uploadRes.json();
+      newImageUrl = uploadResult.url;
+      console.log("New profile image URL:", newImageUrl);
+    } catch (err) {
+      const errorMsg =
+        err instanceof Error ? err.message : "Unknown image upload error";
+      setProfileImgUpdateError(`อัปโหลดรูปไม่สำเร็จ: ${errorMsg}`);
+      setIsUploadingProfileImg(false);
+      return;
+    }
+
+    // 2. อัปเดต User Profile ด้วย URL รูปใหม่
+    try {
+      console.log(
+        `Updating profile for user ${session.user.id} with image: ${newImageUrl}`
+      );
+      const res = await fetch(`/api/user`, {
+        // API อัปเดต Profile
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profileImg: newImageUrl }), // ส่งแค่ field ที่เปลี่ยน
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(
+          errorData.error ||
+            `Failed to update profile image (status: ${res.status})`
+        );
+      }
+      const updatedUser: UserProfile = await res.json();
+      alert("เปลี่ยนรูปโปรไฟล์สำเร็จ!");
+      setProfileImageFile(null); // เคลียร์ไฟล์ที่เลือก
+      // อัปเดต session เพื่อให้รูปใหม่แสดงผลทันที (สำคัญ!)
+      if (session) {
+        // ตรวจสอบว่า session มีค่าก่อน
+        await update({
+          // เรียกใช้ฟังก์ชัน update ที่ได้จาก useSession
+          ...session, // ส่ง session object เดิมเข้าไปด้วย
+          user: {
+            ...session.user,
+            image: updatedUser.profileImg, // อัปเดตเฉพาะ image ใน user object
+          },
+        });
+        console.log("Session updated with new profile image.");
+      }
+      // setProfilePreviewUrl(updatedUser.profileImg || defaultAvatar.src); // อัปเดต Preview เป็นรูปใหม่จาก DB
+      // หรือให้ useEffect ที่ดึง Profile ทำงานใหม่ โดยการ reload หรือเปลี่ยน dependency
+      // window.location.reload(); // วิธีง่ายสุด แต่ไม่ดีเท่า updateSession
+    } catch (err) {
+      const errorMsg =
+        err instanceof Error ? err.message : "Unknown error updating profile";
+      setProfileImgUpdateError(`บันทึกรูปโปรไฟล์ไม่สำเร็จ: ${errorMsg}`);
+    } finally {
+      setIsUploadingProfileImg(false);
+    }
+  };
   // --- Loading / Unauthenticated Check ---
   if (sessionStatus === "loading" || isLoading) {
     return (
@@ -335,14 +468,22 @@ export default function ProfilePage() {
     <div className={styles.container}>
       {/* --- Sidebar (Rendered Once) --- */}
       <aside className={styles.sidebar}>
-        <div className={styles.avatarBox}>
+        <div
+          className={`${styles.avatarBox} ${styles.clickableProfileImage}`}
+          onClick={triggerFileInput}
+          title="คลิกเพื่อเปลี่ยนรูปโปรไฟล์"
+        >
           <Image
-            src={session.user.image || defaultAvatar.src} // ใช้รูปจาก session หรือ default
+            src={profilePreviewUrl || session.user.image || defaultAvatar.src} // แสดง Preview ถ้ามี หรือรูปจาก session หรือ default
             alt="avatar"
-            width={80} // กำหนดขนาดให้ชัดเจน
+            width={80}
             height={80}
-            className={styles.avatar} // ใช้ style จาก css module
+            className={styles.avatar}
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = defaultAvatar.src;
+            }}
           />
+
           <div className="font-semibold mt-2">
             {" "}
             {/* เพิ่ม margin top */}
@@ -357,6 +498,15 @@ export default function ProfilePage() {
             )}
           </div>
         </div>
+        <input
+          type="file"
+          id="profileImageInputHidden" // เปลี่ยน ID ไม่ให้ซ้ำกับ Label ถ้ามี
+          accept="image/*"
+          ref={fileInputRef} // <<-- ผูก Ref
+          onChange={handleProfileImageChange}
+          className={styles.hiddenFileInput} // <<-- Class สำหรับซ่อน
+          style={{ display: 'none' }} // หรือซ่อนด้วย Style โดยตรง
+        />
         <ul className={styles.sidebarMenu}>
           {[
             { key: "courses", icon: CourseIcon, label: "คอร์สของฉัน" },

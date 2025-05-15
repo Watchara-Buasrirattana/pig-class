@@ -48,6 +48,19 @@ model User {
   orders         Order[]
 }
 
+model ScheduledSession {
+  id              Int      @id @default(autoincrement())
+  courseId        Int
+  course          Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title           String?  
+  description     String?  @db.Text
+  startTime       DateTime 
+  endTime         DateTime 
+  location        String?  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Course {
   id           Int           @id @default(autoincrement())
   courseNumber String
@@ -64,6 +77,7 @@ model Course {
   cartItems    CartItem[]
   orderItems   OrderItem[]
   documents    Document[]
+  scheduledSessions ScheduledSession[]
 }
 
 model Enrollment {
@@ -73,6 +87,8 @@ model Enrollment {
   course     Course   @relation(fields: [courseId], references: [id])
   courseId   Int
   date       DateTime @default(now())
+
+   @@unique([userId, courseId])
 }
 
 model Cart {
@@ -143,6 +159,7 @@ model Video {
   lessonId Int
   title     String
   url       String
+  order    Int?
 }
 
 model Document {

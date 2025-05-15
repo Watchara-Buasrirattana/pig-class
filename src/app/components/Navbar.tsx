@@ -17,7 +17,7 @@ const Navbar: React.FC = () => {
 
   const menuItems = [
     { label: 'คอร์สเรียน', href: '/course' },
-    { label: 'โจทย์เกม', href: '/games' },
+    { label: 'Calendar', href: '/calendar' },
     { label: 'บทความ', href: '/article' },
     { label: 'ความสำเร็จ', href: '/achievement' },
   ];
@@ -78,7 +78,7 @@ const Navbar: React.FC = () => {
           </li>
         ))}
         <li>
-          <Link href='/cart' className={pathname === '/' ? 'active' : ''} onClick={toggleMenu}>
+           <Link href='/cart' className={pathname === '/cart' ? 'active' : ''} onClick={toggleMenu}>
             ตะกร้า
           </Link>
         </li>

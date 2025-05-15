@@ -13,6 +13,7 @@ const sidebarLinks = [
     { label: "คอร์สเรียน", path: "/admin", key: "courses" }, // Link ไปหน้าแสดงคอร์ส
     { label: "บทความ", path: "/admin/articles", key: "articles" }, // Link ไปหน้าบทความ
     { label: "ความสำเร็จ", path: "/admin/achievements", key: "achievements" },
+    { label: "Calendar", path: "/admin/calendar", key: "calendar" },
 ];
 
 export default function AdminLayout({

@@ -169,7 +169,6 @@ export default function CourseDetailPage() {
 
                     <div className={styles.actions}>
                         <button onClick={handleAddToCart} className={styles.cart}>เพิ่มลงรถเข็น</button>
-                        <button onClick={handleBuyNow} className={styles.buy}>สั่งซื้อ</button>
                     </div>
                 </div>
             </section>
@@ -211,13 +210,12 @@ export default function CourseDetailPage() {
                             .sort((a, b) => a.lessonNumber - b.lessonNumber) // เรียงตาม lessonNumber
                             .map((lesson) => (
                                 // ใช้ Link ของ Next.js
-                                <Link
+                                <div
                                     key={lesson.id}
-                                    href={`/learn/${courseData.id}/lesson/${lesson.id}`} // <<-- สร้าง Path สำหรับหน้าเรียน
                                     className={styles.lessonButton}
                                 >
                                     {lesson.lessonNumber}. {lesson.title}
-                                </Link>
+                                </div>
                             ))
                     ) : (
                         <p className="text-gray-500 italic">ยังไม่มีบทเรียนสำหรับคอร์สนี้</p>

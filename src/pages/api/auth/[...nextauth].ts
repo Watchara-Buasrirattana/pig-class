@@ -1,13 +1,16 @@
-// pages/api/auth/[...nextauth].ts
-import NextAuth, { NextAuthOptions, User, SessionStrategy, Session } from "next-auth"; // เพิ่ม User
-import { JWT } from "next-auth/jwt"; // เพิ่ม JWT
+// src/pages/api/auth/[...nextauth].ts
+import NextAuth, { NextAuthOptions, User as NextAuthUserOriginal, Account, Profile, SessionStrategy, Session } from "next-auth";
+import { AdapterUser } from "next-auth/adapters"; // Import AdapterUser
+import { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "../../../lib/prisma"; // ตรวจสอบ path prisma
 import bcrypt from "bcryptjs";
 
+// User type ที่ขยายแล้วจะถูก import โดยอัตโนมัติจาก next-auth.d.ts
+// ไม่จำเป็นต้องประกาศ CustomAuthorizeUser ที่นี่อีก ถ้า User ใน next-auth.d.ts ครอบคลุมแล้ว
 
-export const authOptions: NextAuthOptions = { // ใส่ Type ให้ authOptions
+export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
@@ -17,82 +20,99 @@ export const authOptions: NextAuthOptions = { // ใส่ Type ให้ authOp
         password: { label: "Password", type: "password" },
       },
       authorize: async (credentials) => {
-        if (!credentials?.email || !credentials.password) { // เพิ่ม check email ด้วย
-             return null;
+        if (!credentials?.email || !credentials.password) {
+          console.log("Authorize: Missing credentials");
+          return null;
         }
 
-        const user = await prisma.user.findUnique({
+        const userFromDb = await prisma.user.findUnique({
           where: { email: credentials.email },
         });
 
-        // ตรวจสอบ user และ hashedPassword ก่อน compare
-        if (!user || !user.hashedPassword) {
-            console.log("User not found or no hashed password for:", credentials.email);
-            return null;
+        if (!userFromDb || !userFromDb.hashedPassword) {
+          console.log("Authorize: User not found or no hashed password for:", credentials.email);
+          return null;
         }
 
-        const isValid = await bcrypt.compare(credentials.password, user.hashedPassword);
+        const isValidPassword = await bcrypt.compare(credentials.password, userFromDb.hashedPassword);
 
-        if (!isValid) {
-            console.log("Invalid password for user:", credentials.email);
-            return null;
+        if (!isValidPassword) {
+          console.log("Authorize: Invalid password for user:", credentials.email);
+          return null;
         }
 
-        console.log("Authorization successful for:", user.email, "Role:", user.role);
-        // --- แก้ไขตรงนี้: เพิ่ม role เข้าไปใน object ที่ return ---
+        console.log("Authorize: Successful for:", userFromDb.email, "ProfileImg from DB:", userFromDb.profileImg);
+
+        // Return object ที่มี field ตรงกับ User interface ใน next-auth.d.ts
+        // NextAuth คาดหวัง field `image` สำหรับรูปโปรไฟล์ที่จะ map ไปยัง session.user.image
         return {
-          id: user.id.toString(),
-          email: user.email,
-          // name: `${user.firstName} ${user.lastName}`, // อาจจะใส่ name กลับไป ถ้าต้องการ
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role,
-          point: user.point ?? 0, // <<-- เพิ่ม role
+          id: userFromDb.id.toString(), // id ของ NextAuth User เป็น string
+          email: userFromDb.email,
+          name: (userFromDb.firstName && userFromDb.lastName) ? `${userFromDb.firstName} ${userFromDb.lastName}` : userFromDb.firstName || userFromDb.lastName || null,
+          firstName: userFromDb.firstName, // ส่งไปด้วยถ้าต้องการใช้ใน token หรือ session
+          lastName: userFromDb.lastName,   // ส่งไปด้วยถ้าต้องการใช้ใน token หรือ session
+          image: userFromDb.profileImg, // <<<< สำคัญ: Map `profileImg` จาก DB ไปยัง `image` ที่ NextAuth คาดหวัง
+          role: userFromDb.role,
+          // profileImg: userFromDb.profileImg, // ถ้าต้องการส่ง profileImg แยกต่างหากด้วยก็ได้ แต่ image จะถูกใช้สำหรับ session.user.image
         };
       }
     }),
   ],
   session: {
-    strategy: "jwt" as SessionStrategy, // ใช้ JWT strategy ถูกต้องแล้ว
+    strategy: "jwt" as SessionStrategy,
   },
-  secret: process.env.NEXTAUTH_SECRET, // ต้องมีค่านี้ใน .env.local
-
-  // --- เพิ่มส่วน Callbacks ตรงนี้ ---
+  secret: process.env.NEXTAUTH_SECRET, // ตรวจสอบว่ามีใน .env.local
   callbacks: {
-    async jwt({ token, user }: { token: JWT; user?: User }) { // ระบุ Type
-      // ตอน login ครั้งแรก (object 'user' จาก authorize จะถูกส่งมา)
-      if (user?.role) { // ถ้ามี user และ role
-        token.role = user.role; // เพิ่ม role เข้าไปใน token
-        token.id = user.id; 
-            // เพิ่ม id เข้าไปใน token
-         // token.name = user.name; // ถ้าต้องการ name ใน token ด้วย
-         // token.picture = user.image; // ถ้าต้องการ image
+    async jwt({ token, user, account, profile, trigger, isNewUser }) {
+      // `user` object (จาก authorize หรือ OAuth) จะมีค่าตอน sign-in หรือ link account
+      if (user) { // ตรวจสอบว่า user object ไม่ใช่ undefined
+        token.id = user.id; // user.id จาก authorize (ซึ่งควรเป็น string)
+
+        // DefaultJWT มี name, email, picture อยู่แล้ว
+        // ถ้า user object (จาก authorize) มีค่าเหล่านี้ มันควรจะถูก map มาใส่ token โดยอัตโนมัติในระดับหนึ่ง
+        // แต่เพื่อความแน่นอน หรือถ้าชื่อ field ไม่ตรง ก็ set เองได้
+        if (user.name) token.name = user.name;
+        if (user.email) token.email = user.email; // โดยปกติ email จะอยู่ใน token อยู่แล้ว
+
+        // user.image (ที่เรา map มาจาก userFromDb.profileImg ใน authorize) จะถูกใช้สำหรับ token.picture
+        // ซึ่งเป็น field มาตรฐานที่ NextAuth ใช้สำหรับรูปโปรไฟล์ใน token
+        if (user.image !== undefined) {
+          token.picture = user.image;
+        }
+
+        // เพิ่ม custom fields อื่นๆ
+        if (user.role) {
+          token.role = user.role;
+        }
+        // console.log("JWT Callback - User object received:", user);
       }
-      // console.log("JWT Callback - Token:", token); // สำหรับ Debug
-      return token; // คืนค่า token ที่มีข้อมูลเพิ่มแล้ว
+      // console.log("JWT Callback - Token being returned:", token);
+      return token;
     },
-    async session({ session, token }: { session: Session; token: JWT }) { // ระบุ Type
-      // ตอนเรียกใช้ session (เช่นผ่าน useSession)
-      if (token?.role && session.user) { // ถ้า token มี role และ session.user มีค่า
-        session.user.role = token.role as string; // เอา role จาก token มาใส่ใน session.user
-        session.user.id = token.id as string;     // เอา id จาก token มาใส่ใน session.user
-        // session.user.name = token.name; // ถ้าต้องการ name ใน session
-        // session.user.image = token.picture; // ถ้าต้องการ image
+    async session({ session, token }) {
+      // ข้อมูลจาก token จะถูกนำมาใส่ใน session object
+      if (session.user) {
+        // session.user.name, session.user.email, session.user.image
+        // ควรจะถูกตั้งค่าโดยอัตโนมัติจาก token.name, token.email, token.picture ตามลำดับ
+        // แต่เราสามารถ override หรือเพิ่ม custom fields ได้
+        session.user.id = token.id as string | undefined;
+        session.user.role = token.role as string | undefined;
+
+        // ตรวจสอบอีกครั้งเพื่อให้แน่ใจว่า image ถูกส่งไป
+        if (token.picture !== undefined) {
+          session.user.image = token.picture;
+        } else {
+          session.user.image = null; // หรือ undefined ถ้าไม่มีรูปใน token
+        }
       }
-      // console.log("Session Callback - Session:", session); // สำหรับ Debug
-      return session; // คืนค่า session ที่มีข้อมูล user ครบถ้วน
+      // console.log("Session Callback - Session being returned:", session);
+      return session;
     },
   },
-  // --- จบส่วน Callbacks ---
-
   pages: {
-     signIn: '/login', // หน้า Login ของคุณ
-     // signOut: '/',
-     // error: '/auth/error', // หน้าแสดงข้อผิดพลาด (ถ้ามี)
-     // verifyRequest: '/auth/verify-request', // สำหรับ Email provider
-     // newUser: '/auth/new-user' // หน้าสำหรับผู้ใช้ใหม่ครั้งแรก (ถ้ามี)
-   },
-   // debug: process.env.NODE_ENV === 'development', // เปิด debug mode ตอนพัฒนา
+    signIn: '/login',
+  },
+  // debug: process.env.NODE_ENV === 'development',
 };
 
 export default NextAuth(authOptions);

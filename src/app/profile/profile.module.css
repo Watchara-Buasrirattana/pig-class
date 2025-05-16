@@ -3,15 +3,16 @@
     max-width: 80rem;
     margin: 2.5rem auto;
     font-family: 'Prompt', sans-serif;
+    gap: 1.5rem;
 }
 
 .sidebar {
     width: 16rem;
     background: white;
     padding: 1.5rem;
-    margin-right: 2rem;
     border-radius: 0.75rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    height: fit-content;
 }
 
 .avatarBox {
@@ -181,4 +182,8 @@
 }
 .courseCardItem img { /* Ensure image within the card item behaves well */
     margin-bottom: 0.75rem; /* mb-3 */
+}
+
+@media screen {
+    
 }

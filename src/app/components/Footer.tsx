@@ -28,17 +28,17 @@ const Footer: React.FC = () => {
           <div className="footer-subcol">
             <p className="footer-title">คอร์สเรียน</p>
             <ul>
-              <li><Link href="/">กลางภาค</Link></li>
-              <li><Link href="/">ปลายภาค</Link></li>
-              <li><Link href="/">พื้นฐาน</Link></li>
-              <li><Link href="/">ตะลุยโจทย์</Link></li>
+              <li><Link href="/course">กลางภาค</Link></li>
+              <li><Link href="/course">ปลายภาค</Link></li>
+              <li><Link href="/course">พื้นฐาน</Link></li>
+              <li><Link href="/course">ตะลุยโจทย์</Link></li>
             </ul>
           </div>
 
           <div className="footer-subcol">
-            <p className="footer-title">โจทย์เกมส์</p>
+            <p className="footer-title">ปฏิทินเรียน</p>
             <ul>
-              <li><Link href="/">โจทย์</Link></li>
+              <li><Link href="/calendar">ปฏิทิน</Link></li>
             </ul>
           </div>
 
@@ -55,9 +55,7 @@ const Footer: React.FC = () => {
           <div className="footer-subcol">
             <p className="footer-title">ความสำเร็จ</p>
             <ul>
-              <li><Link href="/">มหาวิทยาลัย</Link></li>
-              <li><Link href="/">ม.4</Link></li>
-              <li><Link href="/">คะแนนสอบ</Link></li>
+              <li><Link href="/achievement">ความสำเร็จ</Link></li>
             </ul>
           </div>
         </div>

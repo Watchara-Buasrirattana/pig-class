@@ -113,13 +113,11 @@
 }
 
 .articleImageContainer {
-  width: 100%; /* ให้กว้างเต็ม Card */
-  aspect-ratio: 16 / 9; /* <<-- กำหนดสัดส่วนรูปภาพที่ต้องการ เช่น 16:9, 4:3, 1:1 */
-  /* หรือถ้าไม่ใช้ aspect-ratio ก็กำหนด height คงที่ */
-  /* height: 180px; */
-  position: relative;   /* <<-- สำคัญมากเมื่อ Image ใช้ fill prop */
-  overflow: hidden;      /* ซ่อนส่วนที่เกินของ Image */
-  margin-bottom: 0.75rem; /* ระยะห่างจาก Title (ถ้ามี) */
-  background-color: #f0f0f0; /* สี Placeholder */
-  border-radius: 6px; /* มุมมนสำหรับกรอบรูป (ถ้าต้องการ) */
+  width: 100%; 
+  aspect-ratio: 16 / 9; 
+  position: relative; 
+  overflow: hidden;      
+  margin-bottom: 0.75rem; 
+  background-color: #f0f0f0; 
+  border-radius: 6px; 
 }

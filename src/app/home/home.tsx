@@ -29,6 +29,22 @@ type CourseFromAPI = {
   courseImg?: string | null;
 };
 
+type ArticleImageFromAPI = {
+  id?: number; // อาจจะมีหรือไม่มี ID จาก DB
+  url: string;
+  order?: number | null;
+};
+type ArticleFromAPI = {
+  id: number;
+  title: string;
+  // description?: string; // หน้า List อาจจะไม่ต้องใช้ Description เต็ม
+  coverImage?: string | null; // URL รูปหน้าปก
+  images?: ArticleImageFromAPI[]; // Array ของรูปภาพ (ถ้า API ส่งมา)
+  publishedAt: string | Date;
+  categoryId: number;
+  category?: { name: string }; // <<-- Category object ที่ include มา
+  // user?: { firstName?: string; lastName?: string }; // ถ้าต้องการแสดงผู้เขียน
+};
 const banners = [
   { id: 1, src: banner, alt: "คอร์สคณิตศาสตร์" },
   { id: 2, src: banner, alt: "อีกคอร์สหนึ่ง" },
@@ -68,7 +84,7 @@ const socials = [
   },
 ];
 
-const categories = ["คลังความรู้", "Check List", "โจทย์ข้อสอบ", "อื่น ๆ"];
+const categoriesTab = ["คลังความรู้", "Check List", "โจทย์ข้อสอบ", "อื่น ๆ"];
 
 const articles = {
   คลังความรู้: [
@@ -133,7 +149,9 @@ export default function Home() {
   const [fetchedCourses, setFetchedCourses] = useState<CourseFromAPI[]>([]);
   const [isLoadingCourses, setIsLoadingCourses] = useState(true); // สถานะ Loading
   const [errorCourses, setErrorCourses] = useState<string | null>(null); // สถานะ Error
-
+  const [allDbArticles, setAllDbArticles] = useState<ArticleFromAPI[]>([]);
+  const [isLoadingArticles, setIsLoadingArticles] = useState(true); // <<< เปลี่ยนชื่อ state
+  const [errorArticles, setErrorArticles] = useState<string | null>(null);   // <<< เปลี่ยนชื่อ state
   const nextSlide = () => setCurrent((prev) => (prev + 1) % banners.length);
   const prevSlide = () =>
     setCurrent((prev) => (prev - 1 + banners.length) % banners.length);
@@ -163,6 +181,32 @@ export default function Home() {
 
     fetchCoursesFromApi();
   }, []);
+
+
+  useEffect(() => {
+    const fetchAllArticles = async () => {
+      setIsLoadingArticles(true); // <<< ใช้ state ที่ถูกต้อง
+      setErrorArticles(null);   // <<< ใช้ state ที่ถูกต้อง
+      try {
+        const res = await fetch("/api/articles");
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.error || `Failed to fetch articles (status: ${res.status})`);
+        }
+        const data: ArticleFromAPI[] = await res.json();
+        setAllDbArticles(data);
+      } catch (err) {
+        console.error("Error fetching articles:", err);
+        setErrorArticles(err instanceof Error ? err.message : "An unknown error occurred"); // <<< ใช้ state ที่ถูกต้อง
+      } finally {
+        setIsLoadingArticles(false); // <<< ใช้ state ที่ถูกต้อง
+      }
+    };
+    fetchAllArticles();
+  }, []);
+    const articlesForDisplay = allDbArticles
+    .filter((article) => article.category?.name === activeTab)
+    .slice(0, 4);
   return (
     <main>
       {/* Banner */}
@@ -273,17 +317,14 @@ export default function Home() {
         </div>
       </section>
 
+      {/* --- Article Section --- */}
       <section className={styles.articleTabSection}>
         <h2 className={styles.title}>บทความ</h2>
-
-        {/* Tabs */}
         <div className={styles.tabList}>
-          {categories.map((cat) => (
+          {categoriesTab.map((cat) => ( // <<< ใช้ categoriesTab
             <button
               key={cat}
-              className={`${styles.tabItem} ${
-                activeTab === cat ? styles.activeTab : ""
-              }`}
+              className={`${styles.tabItem} ${activeTab === cat ? styles.activeTab : ""}`}
               onClick={() => setActiveTab(cat)}
             >
               {cat}
@@ -291,29 +332,80 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Content */}
-        <div className={styles.articleGrid}>
-          {articles[activeTab].slice(0, 4).map((article, idx) => (
-            <div key={idx} className={styles.articleCard}>
-              <a href={article.link} className={styles.articleImageLink}>
-                {" "}
-                {/* Link หลัก */}
-                <Image src={article.image} /* ... */ alt={""} /* ... */ />
-                <p className={styles.articleName}>{article.title}</p>
-                {/* แก้เป็น p หรือ span */}
-                <p className={styles.articleLink}>{activeTab}</p>
-              </a>
-            </div>
-          ))}
-        </div>
+        {/* --- แสดงสถานะ Loading หรือ Error สำหรับบทความ --- */}
+        {isLoadingArticles && <p className="text-center py-4">Loading articles...</p>}
+        {errorArticles && <p className="text-center py-4 text-red-500">Error loading articles: {errorArticles}</p>}
 
-        <div className={styles.articleButtonWrapper}>
-          <a href="/article" className={styles.viewAllBtn}>
-            ดูทั้งหมด
-          </a>
-        </div>
+        {/* --- แสดงบทความเมื่อโหลดเสร็จและไม่มี Error --- */}
+        {!isLoadingArticles && !errorArticles && (
+          <>
+            {articlesForDisplay.length > 0 ? (
+              <div className={styles.articleGrid}>
+                {articlesForDisplay.map((article) => {
+                  const imageUrl = article.coverImage || article1.src; // <<< ใช้ .src สำหรับ StaticImageData
+                  return (
+                    <div key={article.id} className={styles.articleCard}>
+                      <Link href={`/article/${article.id}`} className={styles.articleImageLink}>
+                        <div className={styles.articleImageWrapper}>
+                          <Image
+                            src={imageUrl}
+                            alt={article.title}
+                            fill
+                            sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
+                            style={{ objectFit: "cover" }}
+                            onError={(e) => { (e.target as HTMLImageElement).src = article1.src; }}
+                          />
+                        </div>
+                        <p className={styles.articleName}>{article.title}</p>
+                        <p className={styles.articleLink}>{article.category?.name || "ไม่ระบุหมวดหมู่"}</p>
+                      </Link>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-center text-gray-500 py-4">
+                {allDbArticles.length > 0 ? `ยังไม่มีบทความในหมวดหมู่ "${activeTab}"` : "ยังไม่มีบทความใดๆ ในระบบ"}
+              </p>
+            )}
+            {allDbArticles.filter(art => art.category?.name === activeTab).length > 4 && (
+              <div className={styles.articleButtonWrapper}>
+                <Link href={`/article?category=${encodeURIComponent(activeTab)}`} className={styles.viewAllBtn}>
+                  ดูบทความหมวด {activeTab} ทั้งหมด
+                </Link>
+              </div>
+            )}
+          </>
+        )}
+        {!isLoadingArticles && !errorArticles && allDbArticles.length > 0 && (
+          <div className={styles.articleButtonWrapper} style={{ marginTop: "20px" }}>
+            <Link href="/article" className={styles.viewAllBtn}>ดูบทความทั้งหมด</Link>
+          </div>
+        )}
       </section>
 
+      {/* --- Courses ทดลองเรียน --- */}
+      <section className={styles.recommendSection}>
+        <h2 className={styles.title}>คอร์สทดลองเรียน</h2>
+        {isLoadingCourses && <p className="text-center py-4">Loading trial courses...</p>}
+        {errorCourses && <p className="text-center py-4 text-red-600">Error loading trial courses: {errorCourses}</p>}
+        {!isLoadingCourses && !errorCourses && (
+          <>
+            {fetchedCourses.length > 0 ? ( // ควรมีการ filter คอร์สทดลองเรียน
+              <div className={styles.courseList}>
+                {firstCourses.map((course) => <CourseCard key={course.id} course={course} />)}
+              </div>
+            ) : (
+              <p className="text-center text-gray-500 py-4">ยังไม่มีคอร์สทดลองเรียนในขณะนี้</p>
+            )}
+            {fetchedCourses.length > 4 && ( // ควรเช็คจำนวนคอร์สทดลองเรียนจริงๆ
+              <div className="text-center mt-4">
+                <Link href="/course?trial=true" className={styles.viewAll}>ดูคอร์สทดลองเรียนทั้งหมด</Link>
+              </div>
+            )}
+          </>
+        )}
+      </section>
       {/* --- Courses --- */}
       <section className={styles.recommendSection}>
         <h2 className={styles.title}>คอร์สทดลองเรียน</h2>

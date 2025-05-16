@@ -17,7 +17,7 @@ const Navbar: React.FC = () => {
 
   const menuItems = [
     { label: 'คอร์สเรียน', href: '/course' },
-    { label: 'Calendar', href: '/calendar' },
+    { label: 'ปฏิทินเรียน', href: '/calendar' },
     { label: 'บทความ', href: '/article' },
     { label: 'ความสำเร็จ', href: '/achievement' },
   ];

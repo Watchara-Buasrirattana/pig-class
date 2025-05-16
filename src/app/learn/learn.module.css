@@ -318,7 +318,7 @@
     transition: color 0.3s;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 834px) {
     .learnPageWrapper {
         flex-direction: column;
     }

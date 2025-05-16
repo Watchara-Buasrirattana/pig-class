@@ -2,14 +2,12 @@
   background-color: #0043CC;
   color: white;
   padding: 40px 20px;
-  font-family: "Arial", sans-serif;
   font-size: 16px;
-  
 }
 
 .footer-container {
   display: grid;
-  grid-template-columns: 2fr 3fr 1.5fr; /* ซ้าย-กลาง-ขวา */
+  grid-template-columns: 2fr 3fr 1.5fr;
   gap: 20px;
   max-width: 1400px;
   margin: 0 auto;
@@ -20,7 +18,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;  /* จัดแนวตั้งกลาง */
+  justify-content: center;
   text-align: center;
   height: 100%;
 }
@@ -31,8 +29,8 @@
   grid-template-columns: repeat(4, 0.5fr);
   min-width: 100px;
   justify-content: space-between;
-  gap: 10px; 
-  padding: 0 0px; 
+  gap: 10px;
+  padding: 0 0px;
   flex-wrap: wrap;
 }
 
@@ -50,6 +48,7 @@
   flex: 1;
   min-width: 220px;
 }
+
 .footer-right ul li {
   margin-bottom: 6px;
   font-weight: 200;
@@ -73,7 +72,7 @@
   line-height: 1.6;
   font-weight: 280;
   text-align: center;
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .footer-address {
@@ -87,7 +86,7 @@
 }
 
 .footer-social {
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
   padding-top: 20px;
   display: flex;
   flex-direction: column;
@@ -118,19 +117,13 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 834px) {
   .footer-container {
-    flex-direction: column;
-    gap: 40px;
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
 
   .footer-center {
     grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 480px) {
-  .footer-center {
-    grid-template-columns: 1fr;
   }
 }

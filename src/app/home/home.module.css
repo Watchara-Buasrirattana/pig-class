@@ -193,7 +193,7 @@
 .hallOfFrameCard {
     width: 100%;
     max-width: 260px;
-    aspect-ratio: 13 / 7;
+    aspect-ratio: 4 / 3;
     background-color: #e0e0e0;
     border-radius: 12px;
     overflow: hidden;
@@ -204,7 +204,12 @@
     padding: 3rem 1rem;
     background-color: #F3F7FF;
 }
-
+.achievementImageWrapper {
+  width: 100%;
+  aspect-ratio: 4 / 3; /* <<-- ทำให้เป็นสี่เหลี่ยมจตุรัส (หรือสัดส่วนอื่นที่ต้องการ) */
+  position: relative;    /* <<-- สำคัญสำหรับ Image fill */
+  background-color: #f0f0f0;
+}
 .tabList {
     display: flex;
     justify-content: center;

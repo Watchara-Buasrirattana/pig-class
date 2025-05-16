@@ -45,6 +45,11 @@ type ArticleFromAPI = {
   category?: { name: string }; // <<-- Category object ที่ include มา
   // user?: { firstName?: string; lastName?: string }; // ถ้าต้องการแสดงผู้เขียน
 };
+
+type AchievementFromAPI = {
+    id: number;
+    image: string; // URL ของรูปภาพ
+};
 const banners = [
   { id: 1, src: banner, alt: "คอร์สคณิตศาสตร์" },
   { id: 2, src: banner, alt: "อีกคอร์สหนึ่ง" },
@@ -152,12 +157,15 @@ export default function Home() {
   const [allDbArticles, setAllDbArticles] = useState<ArticleFromAPI[]>([]);
   const [isLoadingArticles, setIsLoadingArticles] = useState(true); // <<< เปลี่ยนชื่อ state
   const [errorArticles, setErrorArticles] = useState<string | null>(null);   // <<< เปลี่ยนชื่อ state
+  const [allDbAchievements, setAllDbAchievements] = useState<AchievementFromAPI[]>([]);
+  const [isLoadingAchievements, setIsLoadingAchievements] = useState(true); // <<< ปรับชื่อ State
+  const [errorAchievements, setErrorAchievements] = useState<string | null>(null); 
   const nextSlide = () => setCurrent((prev) => (prev + 1) % banners.length);
   const prevSlide = () =>
     setCurrent((prev) => (prev - 1 + banners.length) % banners.length);
 
   const firstCourses = fetchedCourses.slice(0, 4);
-
+  const achievementsToDisplay = allDbAchievements.slice(0, 8);
   useEffect(() => {
     const fetchCoursesFromApi = async () => {
       setIsLoadingCourses(true);
@@ -204,9 +212,33 @@ export default function Home() {
     };
     fetchAllArticles();
   }, []);
+
+  useEffect(() => {
+    const fetchAllAchievements = async () => {
+      setIsLoadingAchievements(true); // <<< ใช้ State ที่ถูกต้อง
+      setErrorAchievements(null);   // <<< ใช้ State ที่ถูกต้อง
+      try {
+        const res = await fetch('/api/achievements');
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.error || `Failed to fetch achievements (status: ${res.status})`);
+        }
+        const data: AchievementFromAPI[] = await res.json();
+        setAllDbAchievements(data);
+      } catch (err) {
+        console.error("Error fetching achievements:", err);
+        setErrorAchievements(err instanceof Error ? err.message : "An unknown error occurred"); // <<< ใช้ State ที่ถูกต้อง
+      } finally {
+        setIsLoadingAchievements(false); // <<< ใช้ State ที่ถูกต้อง
+      }
+    };
+    fetchAllAchievements();
+  }, []);
     const articlesForDisplay = allDbArticles
     .filter((article) => article.category?.name === activeTab)
     .slice(0, 4);
+
+
   return (
     <main>
       {/* Banner */}
@@ -296,25 +328,54 @@ export default function Home() {
 
       <section className={styles.hallOfFrameSection}>
         <div className={styles.hallOfFrameHeader}>
-          <h2 className={styles.title}></h2>
+          <h2 className={styles.title}></h2> {/* อาจจะมี title อื่นๆ ถ้าต้องการ */}
           <h2 className={styles.title}>ความสำเร็จ</h2>
-          <a href="/achievement" className={styles.viewAll}>
-            ดูทั้งหมด
-          </a>
+          <a href="/achievement" className={styles.viewAll}>ดูทั้งหมด</a>
         </div>
 
-        <div className={styles.hallOfFrameGrid}>
-          {[...Array(8)].map((_, idx) => (
-            <div key={idx} className={styles.hallOfFrameCard}>
-              <Image
-                src={hallOfFlame.src}
-                alt={`ความสำเร็จ ${idx + 1}`}
-                width={260}
-                height={140}
-              />
-            </div>
-          ))}
-        </div>
+        {/* แสดงสถานะ Loading หรือ Error สำหรับ Achievements */}
+        {isLoadingAchievements && <p className="text-center py-4">Loading achievements...</p>}
+        {errorAchievements && <p className="text-center py-4 text-red-600">Error loading achievements: {errorAchievements}</p>}
+
+        {/* แสดง Grid ของ Achievements เมื่อโหลดเสร็จและไม่มี Error */}
+        {!isLoadingAchievements && !errorAchievements && (
+          <>
+            {achievementsToDisplay.length > 0 ? (
+              <div className={styles.hallOfFrameGrid}>
+                {achievementsToDisplay.map((achievement, index) => {
+                  const imageUrl = achievement.image || hallOfFlame.src;
+                  return (
+                    <div key={achievement.id} className={`${styles.hallOfFrameCard} ${styles.achievementImageWrapper || ""}`}>
+                      <Image
+                        src={imageUrl}
+                        alt={`ความสำเร็จ ${index + 1}`} // หรือ achievement.title ถ้ามี
+                        fill // ใช้ fill เพื่อให้เต็ม .hallOfFrameCard
+                        style={{ objectFit: "contain" }} // ให้รูปภาพ cover พื้นที่ card
+                        sizes="(max-width: 450px) 50vw, (max-width: 834px) 25vw, 20vw" // ปรับ sizes ตาม layout
+                        onError={(e) => { (e.target as HTMLImageElement).src = hallOfFlame.src; }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-center text-gray-500 py-4">ยังไม่มีข้อมูลความสำเร็จในขณะนี้</p>
+            )}
+             {allDbAchievements.length === 0 && !isLoadingAchievements && !errorAchievements && (
+                 <p className="text-center text-gray-500 py-4">
+                    ยังไม่มีข้อมูลความสำเร็จในระบบ
+                 </p>
+            )}
+            {/* อาจจะมีปุ่ม "ดูทั้งหมด" อีกอัน ถ้า achievementsToDisplay น้อยกว่า allDbAchievements.length */}
+            {allDbAchievements.length > 8 && achievementsToDisplay.length === 8 && (
+                 <div className="text-center mt-8"> {/* เพิ่ม mt-8 หรือค่าที่เหมาะสม */}
+                    <Link href="/achievement" className={styles.viewAllBtn}>
+                        ดูความสำเร็จทั้งหมด
+                    </Link>
+                 </div>
+            )}
+          </>
+        )}
       </section>
 
       {/* --- Article Section --- */}

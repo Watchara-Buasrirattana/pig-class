@@ -182,7 +182,7 @@ export default function CoursePage() {
     });
   }, [allDbCourses, selectedLevels, selectedTypes, searchQuery]);
 
-  
+
 
   return (
     // อาจจะต้องมี Layout หลักครอบ (เช่น Navbar, Footer)
@@ -201,28 +201,34 @@ export default function CoursePage() {
             className={styles.searchInput}
           />
         </div>
-        <h3 className={styles.sidebarTitle}>ระดับชั้น</h3>
-        {levels.map((level) => (
-          <label key={level} className={styles.checkboxLabel}>
-            <input
-              type="checkbox"
-              checked={selectedLevels.includes(level)}
-              onChange={() => handleLevelChange(level)}
-            />
-            {level}
-          </label>
-        ))}
-        <h3 className={styles.sidebarTitle}>ประเภทคอร์ส</h3>
-        {types.map((type) => (
-          <label key={type} className={styles.checkboxLabel}>
-            <input
-              type="checkbox"
-              checked={selectedTypes.includes(type)}
-              onChange={() => handleTypeChange(type)}
-            />
-            {type}
-          </label>
-        ))}
+        <div className={styles.group}>
+          <div className={styles.category}>
+            <h3 className={styles.sidebarTitle}>ระดับชั้น</h3>
+            {levels.map((level) => (
+              <label key={level} className={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  checked={selectedLevels.includes(level)}
+                  onChange={() => handleLevelChange(level)}
+                />
+                {level}
+              </label>
+            ))}
+          </div>
+          <div className={styles.category}>
+            <h3 className={styles.sidebarTitle}>ประเภทคอร์ส</h3>
+            {types.map((type) => (
+              <label key={type} className={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  checked={selectedTypes.includes(type)}
+                  onChange={() => handleTypeChange(type)}
+                />
+                {type}
+              </label>
+            ))}
+          </div>
+        </div>
       </aside>
       {/* Main Content แสดงคอร์สที่ Filter แล้ว */}
       <section className={styles.mainContent}>

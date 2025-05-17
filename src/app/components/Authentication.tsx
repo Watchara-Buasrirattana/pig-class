@@ -1,9 +1,10 @@
 "use client"
-import React, {useState } from "react"
+import React, {useState, useEffect } from "react"
 import "./Authentication.css"
 import Image from "next/image"
 import Logo from "../img/Logo.png"
 import { signIn } from "next-auth/react" 
+import { useRouter } from "next/navigation";
 
 
 export default function Authentication() {
@@ -18,7 +19,7 @@ export default function Authentication() {
     acceptTerms: false,
   })
   const [message, setMessage] = useState("")
-
+  const router = useRouter();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target
     setFormData(prev => ({
@@ -26,7 +27,11 @@ export default function Authentication() {
       [name]: type === "checkbox" ? checked : value,
     }))
   }
-
+    useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/"); // หรือหน้าที่คุณต้องการให้ไปหลัง login
+    }
+  }, [router]);
   // API Login
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -43,7 +48,7 @@ export default function Authentication() {
     } else {
       setMessage("✅ เข้าสู่ระบบสำเร็จ")
       // หรือ redirect ไปหน้าอื่น
-      // router.push("/")
+      router.push("/")
     }
   }
 
@@ -80,8 +85,9 @@ export default function Authentication() {
 
       if (res.ok) {
         setMessage("✅ สมัครสมาชิกสำเร็จ!")
+        setIsLogin(true);
         setFormData({
-          email: "",
+          email: submitData.email,
           password: "",
           confirmPassword: "",
           firstName: "",

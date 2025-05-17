@@ -1,238 +1,291 @@
-// --- PATH: app/calendar/page.tsx ---
+// src/app/calendar/page.tsx
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import listPlugin from '@fullcalendar/list';
-import interactionPlugin from '@fullcalendar/interaction'; // สำหรับ eventClick
-import { EventInput } from '@fullcalendar/core';
-import thLocale from '@fullcalendar/core/locales/th';
-import { useRouter } from 'next/navigation'; // สำหรับ App Router
-import { Dialog } from '@headlessui/react';
-import type {
-    EventApi,
-    DateSelectArg,  // <<-- ใช้ DateSelectArg แทน DateClickArg (ถ้าคลิกเลือกช่วงวัน) หรือใช้ EventClickArg แยก
-    EventClickArg,  // <<-- Import แยกแบบนี้
-    EventDropArg,
-} from '@fullcalendar/core';
-import Link from 'next/link';
-// --- (Optional) Import Navbar/Footer ---
-// import Navbar from '@/components/Navbar';
-// import Footer from '@/components/Footer';
+import React, { useEffect, useState, useCallback } from "react"; // เพิ่ม useCallback
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import listPlugin from "@fullcalendar/list";
+import thLocale from "@fullcalendar/core/locales/th";
+import { EventClickArg, EventContentArg, EventInput } from "@fullcalendar/core"; // Import EventInput
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+// import styles from './calendar.module.css'; // ถ้ามี CSS module
 
-// --- Types (ควรตรงกับ API Response) ---
-type ScheduledSessionFromAPI = {
-    id: number;
+// Interface สำหรับ event ที่จะใช้กับ FullCalendar
+interface CalendarDisplayEvent extends EventInput {
+  // kế thừaจาก EventInput ของ FullCalendar
+  // id, title, start, end จะถูกกำหนดโดย EventInput อยู่แล้ว
+  backgroundColor?: string;
+  borderColor?: string;
+  textColor?: string;
+  extendedProps: {
+    description?: string | null;
+    location?: string | null;
+    meetingLink?: string | null;
+    courseName: string;
     courseId: number;
-    title: string | null; // ชื่องานสอนเฉพาะ (ถ้ามี)
-    startTime: string;    // ISO String Date
-    endTime: string;      // ISO String Date
-    location: string | null;
-    description?: string | null; // Optional: คำอธิบายเพิ่มเติม
-    course: {
-        id: number;
-        courseName: string; // ชื่อคอร์สหลัก
-    };
-};
+    isRestricted: boolean;
+  };
+}
 
-// Type สำหรับ Event ใน FullCalendar
-type CalendarEvent = Omit<EventInput, 'start' | 'end'> & {
-    extendedProps: {
-        courseId: number;
-        description?: string | null;
-        location?: string | null;
-        // เพิ่ม properties อื่นๆ ที่ต้องการเมื่อคลิก event
-    };
-};
+// Interface สำหรับข้อมูลที่คาดหวังจาก API
+interface ApiScheduledSessionResponse {
+  id: number;
+  title: string; // API จะส่ง title ที่ผ่านการ process มาแล้ว (session title หรือ course name)
+  description?: string | null;
+  startTime: string; // ISO String
+  endTime: string; // ISO String
+  location?: string | null;
+  sessionSpecificTitle?: string | null;
+  // meetingLink?: string | null; // ถ้า API ส่ง field นี้มา
+  courseId: number;
+  courseName: string;
+  isRestricted: boolean;
+}
 
+const CalendarPage = () => {
+  const router = useRouter();
+  const { data: session } = useSession();
+  const [events, setEvents] = useState<CalendarDisplayEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedEvent, setSelectedEvent] =
+    useState<CalendarDisplayEvent | null>(null);
 
-const formatDate = (dateInput: Date | string | number | null | undefined): string => {
-    if (dateInput === null || dateInput === undefined) return 'N/A';
+  const fetchEvents = useCallback(async () => {
+    // ใช้ useCallback
+    setLoading(true);
+    setError(null);
     try {
-        const d = new Date(dateInput); // new Date() รับ string, number, Date ได้
-        if (isNaN(d.getTime())) {
-            console.warn("formatDate received an invalid dateInput:", dateInput);
-            return 'Invalid Date';
-        }
-        return d.toLocaleDateString('th-TH', {
-            year: 'numeric', month: 'short', day: 'numeric',
-            hour: '2-digit', minute: '2-digit', hour12: false
-        });
-    } catch (e) {
-        console.error("Error in formatDate with input:", dateInput, e);
-        return 'Invalid Date';
+      const response = await fetch("/api/scheduled-sessions");
+      if (!response.ok) {
+        const errorData = await response
+          .json()
+          .catch(() => ({
+            message: `Failed to fetch events: ${response.statusText}`,
+          }));
+        throw new Error(
+          errorData.message || `Failed to fetch events: ${response.statusText}`
+        );
+      }
+      const data: ApiScheduledSessionResponse[] = await response.json();
+      const calendarEvents: CalendarDisplayEvent[] = data.map((apiEvent) => ({
+        id: apiEvent.id.toString(),
+        title: apiEvent.title, // ใช้ title ที่ API ส่งมาโดยตรง
+        start: apiEvent.startTime,
+        end: apiEvent.endTime,
+        backgroundColor: apiEvent.isRestricted ? "#A9A9A9" : "#0043CC", // DarkGray ถ้าถูกจำกัด
+        borderColor: apiEvent.isRestricted ? "#808080" : "#0033a0",
+        textColor: apiEvent.isRestricted ? "#404040" : "white",
+        classNames: apiEvent.isRestricted ? ["fc-event-restricted"] : [], // เพิ่ม class สำหรับ styling
+        extendedProps: {
+          description: apiEvent.description,
+          location: apiEvent.location,
+          // meetingLink: apiEvent.meetingLink,
+          courseName: apiEvent.courseName,
+          courseId: apiEvent.courseId,
+          isRestricted: apiEvent.isRestricted,
+        },
+      }));
+      setEvents(calendarEvents);
+    } catch (err) {
+      console.error("Calendar Page Error - fetchEvents:", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "An unknown error occurred while fetching events."
+      );
+    } finally {
+      setLoading(false);
     }
-};
+  }, []); // useCallback ไม่มี dependencies ที่เปลี่ยนบ่อย
 
-export default function UserCalendarPage() {
-    const router = useRouter();
-    const [events, setEvents] = useState<CalendarEvent[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [selectedEventDetails, setSelectedEventDetails] = useState<CalendarEvent | null>(null);
-    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]); // เรียก fetchEvents เมื่อ component mount หรือ fetchEvents เปลี่ยน (ซึ่งไม่ควรเปลี่ยน)
 
-
-    // --- Fetch Scheduled Sessions (Events) ---
-    useEffect(() => {
-        const fetchScheduledEvents = async (fetchInfo?: { startStr?: string, endStr?: string }) => {
-            setIsLoading(true);
-            setError(null);
-            try {
-                let apiUrl = '/api/scheduled-sessions'; // API เดิมที่ Admin ใช้
-                if (fetchInfo?.startStr && fetchInfo?.endStr) {
-                    apiUrl += `?start=${fetchInfo.startStr}&end=${fetchInfo.endStr}`;
-                }
-                const res = await fetch(apiUrl);
-                if (!res.ok) {
-                    const errData = await res.json().catch(() => ({}));
-                    throw new Error(errData.error || `Failed to fetch schedule (status: ${res.status})`);
-                }
-                const data: ScheduledSessionFromAPI[] = await res.json();
-
-                const calendarEvents: CalendarEvent[] = data.map(session => ({
-                    id: session.id.toString(),
-                    title: `${session.course.courseName}${session.title ? ` - ${session.title}` : ''}`,
-                    start: new Date(session.startTime),
-                    end: new Date(session.endTime),
-                    allDay: false, // หรือตรวจสอบจากข้อมูลจริง
-                    extendedProps: {
-                        courseId: session.courseId,
-                        description: session.description,
-                        location: session.location,
-                    },
-                    // backgroundColor: '#007bff', // ตัวอย่างสี Event
-                    // borderColor: '#007bff'
-                }));
-                setEvents(calendarEvents);
-            } catch (err) {
-                setError(err instanceof Error ? err.message : "Failed to load schedule");
-                console.error("Fetch Schedule Error:", err);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        fetchScheduledEvents(); // โหลดข้อมูลครั้งแรก
-    }, []);
-
-    // --- Handler เมื่อคลิก Event ในปฏิทิน ---
-    const handleEventClick = (clickInfo: EventClickArg) => {
-        // แสดงรายละเอียด Event (อาจจะใน Modal หรือ Tooltip)
-        // หรือ Link ไปยังหน้า Course Detail
-        console.log("Event clicked:", clickInfo.event);
-        setSelectedEventDetails(clickInfo.event as unknown as CalendarEvent); // Cast type
-        setIsDetailModalOpen(true);
-        // ตัวอย่าง: พาไปหน้า Course Detail
-        // router.push(`/courses/${clickInfo.event.extendedProps.courseId}`);
-    };
-
-
-    if (isLoading) return <div className="flex justify-center items-center min-h-screen p-4 text-gray-600">กำลังโหลดปฏิทิน...</div>;
-    if (error) return <div className="flex flex-col justify-center items-center min-h-screen text-red-500 text-center p-4"><p className="text-xl font-semibold">เกิดข้อผิดพลาด</p><p className="mt-2">{error}</p></div>;
+  const renderEventContent = (eventArg: EventContentArg) => {
+    const { isRestricted, location, meetingLink } = eventArg.event
+      .extendedProps as CalendarDisplayEvent["extendedProps"];
+    const title = eventArg.event.title;
+    const timeText = eventArg.timeText;
 
     return (
-        <>
-            {/* <Navbar /> */}
-            <main className="container mx-auto p-4 sm:p-6 lg:p-8">
-                <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">
-                    ปฏิทินการเรียนการสอน
-                </h1>
-                <div className="bg-white p-2 sm:p-4 rounded-lg shadow-lg"> {/* เพิ่ม shadow ให้ดูดีขึ้น */}
-                    <FullCalendar
-                        plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-                        headerToolbar={{
-                            left: 'prev,next today',
-                            center: 'title',
-                            right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth' // เพิ่ม listMonth
-                        }}
-                        initialView="dayGridMonth"
-                        events={events}
-                        locale={thLocale} // ภาษาไทย
-                        buttonText={{
-                            today: 'วันนี้', month: 'เดือน', week: 'สัปดาห์', day: 'วัน', list: 'รายการ'
-                        }}
-                        editable={false} // User ทั่วไปไม่ควรแก้ไข Event ได้
-                        selectable={false} // User ทั่วไปไม่ควรเลือกช่วงวันที่ได้ (ถ้าไม่ต้องการให้ทำ Action)
-                        dayMaxEvents={true} // แสดง +more ถ้า Event ในวันนั้นเยอะ
-                        weekends={true}
-                        eventClick={handleEventClick} // <<-- Handler เมื่อคลิก Event
-                        height="auto" // หรือกำหนดความสูงคงที่ เช่น "700px"
-                        // --- (Optional) ดึง Event ใหม่เมื่อ View หรือช่วงวันที่เปลี่ยน ---
-                        // datesSet={(dateInfo) => {
-                        //     console.log("User Calendar datesSet:", dateInfo.startStr, dateInfo.endStr);
-                        //     fetchScheduledEvents({ startStr: dateInfo.startStr, endStr: dateInfo.endStr });
-                        // }}
-                        // --- (Optional) Custom Event Rendering ---
-                        // eventContent={(eventInfo) => (
-                        //     <>
-                        //       <b>{eventInfo.timeText}</b>
-                        //       <i className="ml-1 truncate">{eventInfo.event.title}</i>
-                        //     </>
-                        // )}
-                    />
-                </div>
-
-                {/* --- Modal แสดงรายละเอียด Event (ตัวอย่างง่ายๆ) --- */}
-                        {selectedEventDetails && (
-            <Dialog open={isDetailModalOpen} onClose={() => setIsDetailModalOpen(false)} className="relative z-50">
-                <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
-                <div className="fixed inset-0 flex items-center justify-center p-4">
-                    <Dialog.Panel className="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
-                        <Dialog.Title className="text-xl font-semibold leading-6 text-gray-900 border-b pb-3 mb-4">
-                            {/* ใช้ Optional Chaining ?. */}
-                            {selectedEventDetails?.title || 'รายละเอียด Event'}
-                        </Dialog.Title>
-                        <div className="space-y-2 text-sm">
-                            <p>
-                                <strong>คอร์ส:</strong>{' '}
-                                {/* selectedEventDetails.title มาจาก FullCalendar event */}
-                                {selectedEventDetails?.title?.split(' - ')[0] ?? 'N/A'}
-                            </p>
-                            <p>
-                                <strong>เริ่ม:</strong>{' '}
-                                {selectedEventDetails?.start ? formatDate(selectedEventDetails.start) : 'N/A'}
-                            </p>
-                            <p>
-                                <strong>สิ้นสุด:</strong>{' '}
-                                {selectedEventDetails?.end ? formatDate(selectedEventDetails.end) : 'N/A'}
-                            </p>
-                            {/* @ts-ignore selectedEventDetails.extendedProps อาจจะยังไม่ถูก type guard ดีพอ */}
-                            {selectedEventDetails?.extendedProps?.location && (
-                                <p><strong>สถานที่/Link:</strong> {selectedEventDetails.extendedProps.location}</p>
-                            )}
-                            {/* @ts-ignore */}
-                            {selectedEventDetails?.extendedProps?.description && (
-                                <p><strong>รายละเอียด:</strong> {selectedEventDetails.extendedProps.description}</p>
-                            )}
-                        </div>
-                        <div className="mt-6 flex justify-end space-x-3"> {/* เพิ่ม space-x-3 */}
-                            {/* ปุ่ม Link ไปหน้า Course Detail */}
-                            {selectedEventDetails?.extendedProps?.courseId && (
-                                <Link
-                                    href={`/course/${selectedEventDetails.extendedProps.courseId}`}
-                                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                                    onClick={() => setIsDetailModalOpen(false)} // ปิด Modal เมื่อคลิก
-                                >
-                                    ดูรายละเอียดคอร์ส
-                                </Link>
-                            )}
-                            <button
-                                type="button"
-                                onClick={() => setIsDetailModalOpen(false)}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-                            >
-                                ปิด
-                            </button>
-                        </div>
-                    </Dialog.Panel>
-                </div>
-            </Dialog>
+      <div className="fc-event-title fc-sticky font-semibold text-xs">
+        {" "}
+        {/* Tailwind: p-1 */}
+        {timeText && (
+          <div className="fc-event-time text-xs">{timeText}</div>
+        )}{" "}
+        {/* Tailwind: text-xs */}
+        <div className="fc-event-title-container">
+          <div className="fc-event-title fc-sticky font-semibold">{title}</div>{" "}
+          {/* Tailwind: font-semibold */}
+        </div>
+        {!isRestricted && location && (
+          <div className="fc-event-location text-xs mt-1">📍 {location}</div>
         )}
-
-            </main>
-            {/* <Footer /> */}
-        </>
+        {!isRestricted && meetingLink && (
+          <div className="fc-event-meeting-link text-xs mt-1">
+            <a
+              href={meetingLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="text-blue-500 hover:text-blue-700"
+            >
+              🔗 Join Meeting
+            </a>
+          </div>
+        )}
+        {isRestricted && (
+          <div className="fc-event-restricted-notice text-xs mt-1 italic">
+            🔒 (ลงทะเบียนเพื่อดูรายละเอียด)
+          </div>
+        )}
+      </div>
     );
-}
+  };
+
+  const handleEventClick = (clickInfo: EventClickArg) => {
+    const eventProps = clickInfo.event
+      .extendedProps as CalendarDisplayEvent["extendedProps"];
+    if (eventProps.isRestricted) {
+      alert(
+        `คุณต้องลงทะเบียนเรียนในคอร์ส "${eventProps.courseName}" เพื่อดูรายละเอียดและเข้าร่วมกิจกรรมนี้`
+      );
+      // ตัวเลือก: พาไปยังหน้ารายละเอียดคอร์ส
+
+      router.push(`/course/${eventProps.courseId}`);
+    } else {
+      setSelectedEvent(clickInfo.event as unknown as CalendarDisplayEvent);
+    }
+  };
+
+  const closeModal = () => {
+    setSelectedEvent(null);
+  };
+
+  if (loading)
+    return (
+      <div className="calendar-loading text-center p-10">
+        กำลังโหลดปฏิทิน...
+      </div>
+    );
+  if (error)
+    return (
+      <div className="calendar-error text-center p-10 text-red-600">
+        เกิดข้อผิดพลาด: {error}
+      </div>
+    );
+
+  return (
+    <div className="calendar-container container mx-auto p-4 md:p-8">
+      <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center text-gray-800">
+        ปฏิทินการเรียน
+      </h1>
+      <div className="calendar-wrapper bg-white p-2 md:p-6 rounded-xl shadow-lg">
+        <FullCalendar
+          plugins={[
+            dayGridPlugin,
+            timeGridPlugin,
+            interactionPlugin,
+            listPlugin,
+          ]}
+          headerToolbar={{
+            left: "prev,next today",
+            center: "title",
+            right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
+          }}
+          initialView="dayGridMonth"
+          events={events}
+          locale={thLocale}
+          buttonText={{
+            today: "วันนี้",
+            month: "เดือน",
+            week: "สัปดาห์",
+            day: "วัน",
+            list: "รายการ",
+          }}
+          eventContent={renderEventContent}
+          eventClick={handleEventClick}
+          editable={session?.user?.role === "admin"}
+          selectable={session?.user?.role === "admin"}
+          selectMirror={true}
+          dayMaxEvents={true}
+          weekends={true}
+          height="auto" // ให้ FullCalendar จัดการความสูง หรือ "calc(100vh - 200px)"
+          contentHeight="auto"
+          aspectRatio={1.8} // ลองปรับค่านี้เพื่อให้เหมาะสม
+          // navLinks={true}
+          // nowIndicator={true}
+        />
+      </div>
+
+      {selectedEvent && !selectedEvent.extendedProps.isRestricted && (
+        <div
+          className="event-modal-overlay fixed inset-0 backdrop-blur-md bg-opacity-60 flex items-center justify-center z-50 p-4"
+          onClick={closeModal}
+        >
+          <div
+            className="event-modal-content bg-white p-6 md:p-8 rounded-lg shadow-xl w-full max-w-md relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={closeModal}
+              className="event-modal-close-button absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-2xl leading-none"
+            >
+              &times;
+            </button>
+            <h2 className="event-modal-title text-xl md:text-2xl font-bold mb-4 text-gray-800">
+              {selectedEvent.title}
+            </h2>
+            <p className="event-modal-time text-sm text-gray-600 mb-4">
+              {new Date(selectedEvent.start as string).toLocaleString("th-TH", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}{" "}
+              -
+              {new Date(selectedEvent.end as string).toLocaleString("th-TH", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </p>
+            {selectedEvent.extendedProps.description && (
+              <p className="mb-3 text-gray-700">
+                <strong>คำอธิบาย:</strong>{" "}
+                {selectedEvent.extendedProps.description}
+              </p>
+            )}
+            {selectedEvent.extendedProps.location && (
+              <p className="mb-3 text-gray-700">
+                <strong>สถานที่:</strong> {selectedEvent.extendedProps.location}
+              </p>
+            )}
+            {selectedEvent.extendedProps.meetingLink && (
+              <p className="mb-3 text-gray-700">
+                <strong>ลิงก์:</strong>{" "}
+                <a
+                  href={selectedEvent.extendedProps.meetingLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 underline"
+                >
+                  เข้าร่วม
+                </a>
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default CalendarPage;

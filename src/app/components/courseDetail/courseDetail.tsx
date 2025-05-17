@@ -154,12 +154,12 @@ export default function CourseDetailPage() {
                         <div /* key={'learningTime'} */>
                             <Image src={TimeIcon.src} alt="เวลาเรียน" height={40} width={40} />
                             <p className={styles.statLabel}>เวลาเรียนรวม</p>
-                            <p className={styles.statValue}>{/* courseData.learningTimeEstimate || */ 'N/A'} </p>
+                            <p className={styles.statValue}>{/* courseData.learningTimeEstimate || */ '8 ชม.'} </p>
                         </div>
                         <div /* key={'accessPeriod'} */>
                             <Image src={LimitIcon.src} alt="อายุคอร์ส" height={40} width={40} />
                             <p className={styles.statLabel}>อายุคอร์ส</p>
-                            <p className={styles.statValue}>{/* courseData.courseAccessPeriod || */ 'ตลอดชีพ'}</p>
+                            <p className={styles.statValue}>{/* courseData.courseAccessPeriod || */ '6 เดือน'}</p>
                         </div>
                         {/* เพิ่ม Stat อื่นๆ ถ้ามีข้อมูลใน DB */}
                     </div>

@@ -12,6 +12,11 @@
     height: fit-content;
 }
 
+.category {
+    display: flex;
+    flex-direction: column;
+}
+
 .sidebarTitle {
     font-size: 24px;
     font-weight: 700;
@@ -60,7 +65,7 @@
 
 .courseList {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 2rem;
 }
 
@@ -123,4 +128,161 @@
     font-size: 20px;
     font-weight: bold;
     cursor: pointer;
+}
+
+@media (max-width: 834px) {
+    .pageWrapper {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+    }
+
+    .category {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .sidebarTitle {
+        font-size: 16px;
+        margin: 1rem 0 1rem;
+    }
+
+    .checkboxLabel {
+        margin-bottom: 0;
+        font-size: 18px;
+    }
+
+    .pageTitle {
+        font-size: 28px;
+        margin-bottom: 1rem;
+    }
+
+    .courseList {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .courseCard {
+        padding: 0.5rem;
+        height: 100%;
+    }
+
+    .imageWrapper {
+        height: 250px;
+    }
+
+    .courseTitle {
+        font-size: 18px;
+        font-weight: bold;
+        margin-top: 0.5rem;
+    }
+
+    .price {
+        font-size: 16px;
+        font-weight: bold;
+        margin-top: 0.5rem;
+    }
+
+    .code {
+        font-size: 14px;
+        color: gray;
+        margin-bottom: 0.25rem;
+    }
+
+    .actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .cartIcon {
+        font-size: 20px;
+    }
+
+    .detailBtn {
+        padding: 0.3rem 1.2rem;
+        font-size: 16px;
+        font-weight: bold;
+    }
+}
+
+@media (max-width: 500px) {
+    .pageWrapper {
+        padding: 1rem;
+    }
+
+    .group {
+        display: flex;
+        justify-content: space-around;
+    }
+
+    .category {
+        flex-direction: column;
+    }
+
+    .sidebarTitle {
+        font-size: 12px;
+        margin: 1rem 0 1rem;
+    }
+
+    .checkboxLabel {
+        margin-bottom: 0;
+        font-size: 18px;
+    }
+
+    .pageTitle {
+        font-size: 24px;
+        margin-bottom: 0.5rem;
+    }
+
+    .courseList {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 0.5rem;
+    }
+
+    .courseCard {
+        padding: 0.25rem;
+        height: 100%;
+    }
+
+    .imageWrapper {
+        height: 250px;
+    }
+
+    .courseTitle {
+        font-size: 16px;
+        font-weight: bold;
+        margin-top: 0.5rem;
+    }
+
+    .price {
+        font-size: 14px;
+        font-weight: bold;
+        margin-top: 0.5rem;
+    }
+
+    .code {
+        font-size: 12px;
+        color: gray;
+        margin-bottom: 0.2rem;
+    }
+
+    .actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .cartIcon {
+        font-size: 18px;
+    }
+
+    .detailBtn {
+        padding: 0.3rem 1rem;
+        font-size: 14px;
+        font-weight: bold;
+    }
 }

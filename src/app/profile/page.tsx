@@ -21,7 +21,7 @@ import PigIcon from "../img/Pig-icon.png";
 import LogoutIcon from "../img/Logout-icon.png";
 import defaultAvatar from "../img/Pig-icon.png"; // ตัวอย่างรูป Avatar Default
 import Link from "next/link";
-
+import AdminPanelIcon from "../img/Profile-icon.png";
 // --- Types ---
 type UserProfile = {
   id?: number | string;
@@ -492,7 +492,7 @@ export default function ProfilePage() {
               `${form.firstName} ${form.lastName}`.trim() ||
               session.user.email}
             {session.user.role && (
-              <span className="block text-xs text-gray-300 capitalize mt-1">
+              <span className="block text-xs text-gray-400 capitalize mt-1">
                 ({session.user.role})
               </span>
             )}
@@ -505,7 +505,7 @@ export default function ProfilePage() {
           ref={fileInputRef} // <<-- ผูก Ref
           onChange={handleProfileImageChange}
           className={styles.hiddenFileInput} // <<-- Class สำหรับซ่อน
-          style={{ display: 'none' }} // หรือซ่อนด้วย Style โดยตรง
+          style={{ display: "none" }} // หรือซ่อนด้วย Style โดยตรง
         />
         <ul className={styles.sidebarMenu}>
           {[
@@ -513,17 +513,39 @@ export default function ProfilePage() {
             { key: "info", icon: InfoIcon, label: "ข้อมูลส่วนตัว" },
             { key: "orders", icon: PaymentIcon, label: "ประวัติการสั่งซื้อ" },
             { key: "points", icon: PigIcon, label: "แต้มการสะสม" },
-          ].map(({ key, icon, label }) => (
+            ...(session?.user?.role === "admin" // ตรวจสอบ role ให้ตรงกับค่าใน DB เช่น "ADMIN" หรือ "admin"
+              ? [
+                  {
+                    key: "adminPanel",
+                    icon: AdminPanelIcon,
+                    label: "Admin Panel",
+                    roles: ["admin"],
+                    href: "/admin",
+                  },
+                ]
+              : []),
+          ].map(({ key, icon, label, href }) => (
             <li
               key={key}
               onClick={() => {
-                if (!isEditMode) setActiveMenu(key);
-                else alert("กรุณาบันทึกหรือยกเลิกการแก้ไขก่อนเปลี่ยนเมนู");
+                if (isEditMode && key !== "adminPanel") {
+                  // Admin Panel ควรจะ navigate ได้เสมอถึงแม้จะอยู่ใน edit mode ของ profile
+                  alert("กรุณาบันทึกหรือยกเลิกการแก้ไขก่อนเปลี่ยนเมนู");
+                  return;
+                }
+                if (href) {
+                  // ถ้าเมนูมี href (เช่น Admin Panel)
+                  router.push(href);
+                } else {
+                  setActiveMenu(key); // สำหรับเมนูที่เปลี่ยน content ในหน้านี้
+                }
               }}
               className={`${styles.menuItem} ${
                 activeMenu === key ? styles.active : ""
               } ${
-                isEditMode ? "cursor-not-allowed opacity-70" : "cursor-pointer"
+                isEditMode && key !== "adminPanel"
+                  ? "cursor-not-allowed opacity-70"
+                  : "cursor-pointer"
               }`}
             >
               <div className="flex items-center gap-2">

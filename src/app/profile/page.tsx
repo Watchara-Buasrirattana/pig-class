@@ -563,7 +563,7 @@ export default function ProfilePage() {
               height={25}
               className={styles.menuIcon}
             />
-            <span className="ml-2">ออกจากระบบ</span>
+            <span className="ml-2 text-red-600">ออกจากระบบ</span>
           </li>
         </ul>
       </aside>

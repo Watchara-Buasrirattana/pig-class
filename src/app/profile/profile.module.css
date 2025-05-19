@@ -184,6 +184,12 @@
     margin-bottom: 0.75rem; /* mb-3 */
 }
 
-@media screen {
-    
+@media (max-width: 834px) {
+    .container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+    }
 }

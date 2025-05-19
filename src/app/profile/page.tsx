@@ -512,7 +512,6 @@ export default function ProfilePage() {
             { key: "courses", icon: CourseIcon, label: "คอร์สของฉัน" },
             { key: "info", icon: InfoIcon, label: "ข้อมูลส่วนตัว" },
             { key: "orders", icon: PaymentIcon, label: "ประวัติการสั่งซื้อ" },
-            { key: "points", icon: PigIcon, label: "แต้มการสะสม" },
             ...(session?.user?.role === "admin" // ตรวจสอบ role ให้ตรงกับค่าใน DB เช่น "ADMIN" หรือ "admin"
               ? [
                   {

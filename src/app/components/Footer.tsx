@@ -97,7 +97,7 @@ const Footer: React.FC = () => {
             <Image src={Line} alt="Line" className="social-icon" />
           </a>
         </div>
-        <p className="auth-icons">Pig class</p>
+        <p className="auth-icons">Math Management</p>
       </div>
     </footer>
   );

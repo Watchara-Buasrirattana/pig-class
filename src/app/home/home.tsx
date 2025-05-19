@@ -47,8 +47,8 @@ type ArticleFromAPI = {
 };
 
 type AchievementFromAPI = {
-    id: number;
-    image: string; // URL ของรูปภาพ
+  id: number;
+  image: string; // URL ของรูปภาพ
 };
 const banners = [
   { id: 1, src: banner, alt: "คอร์สคณิตศาสตร์" },
@@ -59,33 +59,33 @@ const banners = [
 const socials = [
   {
     name: "Line",
-    label: "@pig class",
+    label: "@Math Management",
     icon: line,
-    link: "https://line.me/ti/p/~pigclass",
+    link: "https://line.me/ti/p/~mathmanagement",
   },
   {
     name: "Facebook",
-    label: "pig class",
+    label: "Math Management",
     icon: facebook,
-    link: "https://facebook.com/pigclass",
+    link: "https://facebook.com/mathmanagement",
   },
   {
     name: "Instagram",
-    label: "pig class",
+    label: "Math Management",
     icon: ig,
-    link: "https://instagram.com/pigclass",
+    link: "https://instagram.com/mathmanagement",
   },
   {
     name: "TikTok",
-    label: "pig class",
+    label: "Math Management",
     icon: tiktok,
-    link: "https://tiktok.com/@pigclass",
+    link: "https://tiktok.com/@mathmanagement",
   },
   {
     name: "YouTube",
-    label: "pig class",
+    label: "Math Management",
     icon: youtube,
-    link: "https://youtube.com/@pigclass",
+    link: "https://youtube.com/@mathmanagement",
   },
 ];
 
@@ -159,7 +159,7 @@ export default function Home() {
   const [errorArticles, setErrorArticles] = useState<string | null>(null);   // <<< เปลี่ยนชื่อ state
   const [allDbAchievements, setAllDbAchievements] = useState<AchievementFromAPI[]>([]);
   const [isLoadingAchievements, setIsLoadingAchievements] = useState(true); // <<< ปรับชื่อ State
-  const [errorAchievements, setErrorAchievements] = useState<string | null>(null); 
+  const [errorAchievements, setErrorAchievements] = useState<string | null>(null);
   const nextSlide = () => setCurrent((prev) => (prev + 1) % banners.length);
   const prevSlide = () =>
     setCurrent((prev) => (prev - 1 + banners.length) % banners.length);
@@ -234,7 +234,7 @@ export default function Home() {
     };
     fetchAllAchievements();
   }, []);
-    const articlesForDisplay = allDbArticles
+  const articlesForDisplay = allDbArticles
     .filter((article) => article.category?.name === activeTab)
     .slice(0, 4);
 
@@ -361,18 +361,18 @@ export default function Home() {
             ) : (
               <p className="text-center text-gray-500 py-4">ยังไม่มีข้อมูลความสำเร็จในขณะนี้</p>
             )}
-             {allDbAchievements.length === 0 && !isLoadingAchievements && !errorAchievements && (
-                 <p className="text-center text-gray-500 py-4">
-                    ยังไม่มีข้อมูลความสำเร็จในระบบ
-                 </p>
+            {allDbAchievements.length === 0 && !isLoadingAchievements && !errorAchievements && (
+              <p className="text-center text-gray-500 py-4">
+                ยังไม่มีข้อมูลความสำเร็จในระบบ
+              </p>
             )}
             {/* อาจจะมีปุ่ม "ดูทั้งหมด" อีกอัน ถ้า achievementsToDisplay น้อยกว่า allDbAchievements.length */}
             {allDbAchievements.length > 8 && achievementsToDisplay.length === 8 && (
-                 <div className="text-center mt-8"> {/* เพิ่ม mt-8 หรือค่าที่เหมาะสม */}
-                    <Link href="/achievement" className={styles.viewAllBtn}>
-                        ดูความสำเร็จทั้งหมด
-                    </Link>
-                 </div>
+              <div className="text-center mt-8"> {/* เพิ่ม mt-8 หรือค่าที่เหมาะสม */}
+                <Link href="/achievement" className={styles.viewAllBtn}>
+                  ดูความสำเร็จทั้งหมด
+                </Link>
+              </div>
             )}
           </>
         )}
@@ -497,10 +497,10 @@ export default function Home() {
                 height={60}
                 className={styles.socialImage}
               />
-              <p className={styles.socialLabel}>{social.label}</p>
             </a>
           ))}
         </div>
+        <p className={styles.socialLabel}>Math Management</p>
       </section>
     </main>
   );

@@ -524,7 +524,6 @@ export default function ProfilePage() {
                 ]
               : []),
           ].map(({ key, icon, label, href }) => (
-
             <li
               key={key}
               onClick={() => {

@@ -15,7 +15,6 @@ export default async function handler(
   }
   const lessonIdAsNumber = parseInt(lessonId, 10);
 
-  // --- !!! เพิ่มการตรวจสอบสิทธิ์ ตรงนี้ด้วย สำหรับ GET และ POST !!! ---
 
   if (req.method === 'POST') {
     // บันทึกข้อมูล Video Metadata หลังอัปโหลดเสร็จ

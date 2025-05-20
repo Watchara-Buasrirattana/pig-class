@@ -429,13 +429,6 @@ export default function Home() {
                 {allDbArticles.length > 0 ? `ยังไม่มีบทความในหมวดหมู่ "${activeTab}"` : "ยังไม่มีบทความใดๆ ในระบบ"}
               </p>
             )}
-            {allDbArticles.filter(art => art.category?.name === activeTab).length > 4 && (
-              <div className={styles.articleButtonWrapper}>
-                <Link href={`/article?category=${encodeURIComponent(activeTab)}`} className={styles.viewAllBtn}>
-                  ดูบทความหมวด {activeTab} ทั้งหมด
-                </Link>
-              </div>
-            )}
           </>
         )}
         {!isLoadingArticles && !errorArticles && allDbArticles.length > 0 && (

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import styles from "./learn.module.css";
@@ -52,34 +52,61 @@ export default function LearnPage() {
   const [tab, setTab] = useState<"details" | "learn">("details");
   const [selectedLesson, setSelectedLesson] = useState<LessonInfo | null>(null);
   const [selectedVideo, setSelectedVideo] = useState<VideoInfo | null>(null);
-
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     if (courseId) {
       fetch(`/api/courses/${courseId}/learn-details`)
-        .then(res => {
+        .then((res) => {
           if (!res.ok) throw new Error(`Fetch error ${res.status}`);
           return res.json();
         })
         .then((data: CourseLearnData) => {
           setCourseData(data);
 
-          const initialL = data.lessons.find(l => l.id === parseInt(initialLessonId || "")) || data.lessons[0];
-          const initialV = initialL?.videos.find(v => v.id === parseInt(initialVideoId || "")) || initialL?.videos[0] || null;
+          const initialL =
+            data.lessons.find(
+              (l) => l.id === parseInt(initialLessonId || "")
+            ) || data.lessons[0];
+          const initialV =
+            initialL?.videos.find(
+              (v) => v.id === parseInt(initialVideoId || "")
+            ) ||
+            initialL?.videos[0] ||
+            null;
 
           setSelectedLesson(initialL);
           setSelectedVideo(initialV);
         })
-        .catch(err => setError(err.message))
+        .catch((err) => setError(err.message))
         .finally(() => setIsLoading(false));
     }
   }, [courseId, initialLessonId, initialVideoId]);
+  useEffect(() => {
+    const videoElement = videoRef.current;
 
+    if (videoElement) {
+      const handleContextMenu = (event: MouseEvent) => {
+        event.preventDefault(); // ป้องกันการแสดง context menu
+      };
+
+      videoElement.addEventListener("contextmenu", handleContextMenu);
+
+      // Cleanup function เพื่อลบ event listener เมื่อ component unmount หรือ video เปลี่ยน
+      return () => {
+        videoElement.removeEventListener("contextmenu", handleContextMenu);
+      };
+    }
+  }, [selectedVideo]);
   const goToNext = () => {
     if (!courseData || !selectedLesson || !selectedVideo) return;
 
-    const currentLessonIndex = courseData.lessons.findIndex(l => l.id === selectedLesson.id);
-    const currentVideoIndex = selectedLesson.videos.findIndex(v => v.id === selectedVideo.id);
+    const currentLessonIndex = courseData.lessons.findIndex(
+      (l) => l.id === selectedLesson.id
+    );
+    const currentVideoIndex = selectedLesson.videos.findIndex(
+      (v) => v.id === selectedVideo.id
+    );
 
     if (currentVideoIndex < selectedLesson.videos.length - 1) {
       setSelectedVideo(selectedLesson.videos[currentVideoIndex + 1]);
@@ -103,12 +130,20 @@ export default function LearnPage() {
   };
 
   if (isLoading) return <div className="p-4">Loading...</div>;
-  if (error || !courseData) return <div className="p-4 text-red-600">{error || "ไม่พบข้อมูลคอร์ส"}</div>;
+  if (error || !courseData)
+    return (
+      <div className="p-4 text-red-600">{error || "ไม่พบข้อมูลคอร์ส"}</div>
+    );
 
   return (
     <main className={styles.background}>
       <div className={styles.container}>
-        <button className={styles.backBtn} onClick={() => router.push(`/course/${courseId}`)}>&lt; ย้อนกลับ</button>
+        <button
+          className={styles.backBtn}
+          onClick={() => router.push(`/course/${courseId}`)}
+        >
+          &lt; ย้อนกลับ
+        </button>
 
         <h1 className={styles.title}>{courseData.courseName}</h1>
         <p className={styles.code}>{courseData.courseNumber}</p>
@@ -121,22 +156,45 @@ export default function LearnPage() {
         <div className={styles.learnPageWrapper}>
           <aside className={styles.sidebar}>
             <div className={styles.tabButtons}>
-              <button className={`${styles.tabBtn} ${tab === "details" ? styles.activeTab : ""}`} onClick={() => { setTab("details"); setSelectedLesson(null); setSelectedVideo(null); }}>เอกสาร</button>
-              <button className={`${styles.tabBtn} ${tab === "learn" ? styles.activeTab : ""}`} onClick={() => {
-                if (courseData?.lessons?.length > 0) {
-                  const firstLesson = courseData.lessons[0];
-                  const firstVideo = firstLesson.videos[0] || null;
-                  setSelectedLesson(firstLesson);
-                  setSelectedVideo(firstVideo);
-                }
-                setTab("learn");
-              }}>เข้าเรียน</button>
+              <button
+                className={`${styles.tabBtn} ${
+                  tab === "details" ? styles.activeTab : ""
+                }`}
+                onClick={() => {
+                  setTab("details");
+                  setSelectedLesson(null);
+                  setSelectedVideo(null);
+                }}
+              >
+                เอกสาร
+              </button>
+              <button
+                className={`${styles.tabBtn} ${
+                  tab === "learn" ? styles.activeTab : ""
+                }`}
+                onClick={() => {
+                  if (courseData?.lessons?.length > 0) {
+                    const firstLesson = courseData.lessons[0];
+                    const firstVideo = firstLesson.videos[0] || null;
+                    setSelectedLesson(firstLesson);
+                    setSelectedVideo(firstVideo);
+                  }
+                  setTab("learn");
+                }}
+              >
+                เข้าเรียน
+              </button>
             </div>
 
             {tab === "details" && (
               <section className={styles.topSection}>
                 <div className={styles.imageBox}>
-                  <Image src={courseData.courseImg || defaultCourseImage} alt="Course Image" fill className={styles.coverImage} />
+                  <Image
+                    src={courseData.courseImg || defaultCourseImage}
+                    alt="Course Image"
+                    fill
+                    className={styles.coverImage}
+                  />
                 </div>
               </section>
             )}
@@ -144,12 +202,34 @@ export default function LearnPage() {
             {tab === "learn" && (
               <ul className={styles.lessonList}>
                 {courseData.lessons.map((lesson) => (
-                  <li key={lesson.id} className={`${styles.lessonItem} ${selectedLesson?.id === lesson.id ? styles.activeLesson : ""}`}>
-                    <div onClick={() => { setSelectedLesson(lesson); setSelectedVideo(null); }}>{lesson.title}</div>
+                  <li
+                    key={lesson.id}
+                    className={`${styles.lessonItem} ${
+                      selectedLesson?.id === lesson.id
+                        ? styles.activeLesson
+                        : ""
+                    }`}
+                  >
+                    <div
+                      onClick={() => {
+                        setSelectedLesson(lesson);
+                        setSelectedVideo(null);
+                      }}
+                    >
+                      {lesson.title}
+                    </div>
                     {selectedLesson?.id === lesson.id && (
                       <ul className={styles.partList}>
                         {lesson.videos.map((video) => (
-                          <li key={video.id} className={`${styles.partItem} ${selectedVideo?.id === video.id ? styles.activePart : ""}`} onClick={() => setSelectedVideo(video)}>
+                          <li
+                            key={video.id}
+                            className={`${styles.partItem} ${
+                              selectedVideo?.id === video.id
+                                ? styles.activePart
+                                : ""
+                            }`}
+                            onClick={() => setSelectedVideo(video)}
+                          >
                             {video.title}
                           </li>
                         ))}
@@ -165,7 +245,9 @@ export default function LearnPage() {
             {tab === "details" && (
               <>
                 <div className={styles.documentDownloadSection}>
-                  <h2 className={styles.titleContent}>ดาวน์โหลดเอกสารการเรียน</h2>
+                  <h2 className={styles.titleContent}>
+                    ดาวน์โหลดเอกสารการเรียน
+                  </h2>
                   {courseData.documents && courseData.documents.length > 0 ? (
                     <div className={styles.documentList}>
                       {courseData.documents.map((doc) => (
@@ -183,7 +265,9 @@ export default function LearnPage() {
                             height={52}
                           />
                           <div className={styles.documentInfo}>
-                            <span className={styles.documentTitle}>{doc.title}</span>
+                            <span className={styles.documentTitle}>
+                              {doc.title}
+                            </span>
                             {doc.fileSize && (
                               <span className={styles.documentSize}>
                                 {(doc.fileSize / 1024 / 1024).toFixed(2)} MB
@@ -201,10 +285,19 @@ export default function LearnPage() {
                 </div>
 
                 <section className={styles.lessonSection}>
-                  <h3 className={styles.lessonHeader}>{courseData.courseName}</h3>
+                  <h3 className={styles.lessonHeader}>
+                    {courseData.courseName}
+                  </h3>
                   <div className={styles.lessonTable}>
                     {courseData.lessons.map((lesson) => (
-                      <button key={lesson.id} className={styles.lessonButton} onClick={() => { setSelectedLesson(lesson); setTab("learn"); }}>
+                      <button
+                        key={lesson.id}
+                        className={styles.lessonButton}
+                        onClick={() => {
+                          setSelectedLesson(lesson);
+                          setTab("learn");
+                        }}
+                      >
                         {lesson.title}
                       </button>
                     ))}
@@ -218,7 +311,11 @@ export default function LearnPage() {
                 <h2 className={styles.titleContent}>{selectedLesson.title}</h2>
                 <ul className={styles.partList}>
                   {selectedLesson.videos.map((video) => (
-                    <li key={video.id} className={styles.partItemContent} onClick={() => setSelectedVideo(video)}>
+                    <li
+                      key={video.id}
+                      className={styles.partItemContent}
+                      onClick={() => setSelectedVideo(video)}
+                    >
                       {video.title}
                     </li>
                   ))}
@@ -246,7 +343,16 @@ export default function LearnPage() {
                       />
                     </div>
                   ) : (
-                    <video width="100%" controls src={selectedVideo.url} className={styles.videoPlayer} />
+                    <video
+                      width="100%"
+                      controls
+                      src={selectedVideo.url}
+                      controlsList="nodownload"
+                      className={styles.videoPlayer}
+                      onContextMenu={(e) => {
+                        e.preventDefault(); // ป้องกันการคลิกขวา
+                      }}
+                    />
                   )
                 ) : (
                   <div className={styles.noVideoSelected}>
@@ -255,13 +361,20 @@ export default function LearnPage() {
                 )}
 
                 {selectedVideo && (
-                  <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem" }}>
-                    <button className={styles.nextBtn} onClick={goToNext}>ถัดไป</button>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      marginTop: "1rem",
+                    }}
+                  >
+                    <button className={styles.nextBtn} onClick={goToNext}>
+                      ถัดไป
+                    </button>
                   </div>
                 )}
               </div>
             )}
-
           </div>
         </div>
       </div>

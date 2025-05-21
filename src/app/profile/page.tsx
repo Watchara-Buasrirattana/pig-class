@@ -15,6 +15,7 @@ import Image from "next/image"; // Import Image
 
 // --- Import Icons ---
 import CourseIcon from "../img/Course-icon.png";
+import CourseImage from "../img/recom-course.png";
 import InfoIcon from "../img/Profile-icon.png";
 import PaymentIcon from "../img/Payment-icon.png";
 import PigIcon from "../img/Pig-icon.png";
@@ -631,7 +632,7 @@ export default function ProfilePage() {
                       {" "}
                       {/* Style สำหรับแต่ละ Card */}
                       <Image
-                        src={course.courseImg || defaultAvatar.src} // ใช้ defaultAvatar ถ้า courseImg ไม่มี
+                        src={course.courseImg || CourseImage.src} // ใช้ defaultAvatar ถ้า courseImg ไม่มี
                         alt={course.courseName || "Course Image"}
                         width={250} // ปรับขนาดตามต้องการ
                         height={150}
